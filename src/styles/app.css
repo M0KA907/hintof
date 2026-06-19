@@ -171,7 +171,7 @@ h3 {
 .form-section {
   border: var(--border);
   border-left-width: 3px;
-  border-left-color: color-mix(in srgb, var(--teal-geo) 65%, transparent);
+  border-left-color: var(--teal-geo);
   border-radius: var(--radius-md);
   background: var(--surface);
 }
