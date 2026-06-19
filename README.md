@@ -4,7 +4,7 @@ Write a recipe, get a clean Obsidian note.
 
 hintof is a small, fast, fully client-side web tool for turning a structured form into properly formatted, Obsidian-compatible Markdown — with the YAML escaping, safe filenames, and consistent note structure handled for you. It runs entirely in your browser. Nothing you type is ever uploaded anywhere.
 
-> Status: **specification complete, implementation not started.** See [`docs/`](docs/) for the full spec set.
+> Status: **implementation started.** Phase 0.1 has the Vite/TypeScript toolchain scaffold; see [`docs/`](docs/) for the full spec set.
 
 ## Why
 
@@ -46,12 +46,10 @@ TypeScript + Vite, no UI framework, zero runtime dependencies, deployed as stati
 
 ## Development
 
-> Tooling lands in Phase 0 of the implementation plan; these are the intended commands.
-
 ```bash
 npm install
 npm run dev      # local dev server
-npm run check    # typecheck + lint + unit/golden + e2e + a11y (the CI gate)
+npm run check    # current scaffold gate: typecheck + lint + unit + build
 npm run build    # static build for GitHub Pages
 ```
 

@@ -86,7 +86,7 @@ npm run check          # the CI gate (all of the above)
 Acceptance criteria met; unit/golden/e2e/a11y tests pass in CI; works light+dark, keyboard+touch; zero external network calls; relevant docs updated; deployed Pages build reflects it.
 
 ## Current implementation status
-**Specification phase complete. No application code yet.** Repo currently holds `docs/`, `README.md`, `CLAUDE.md`, `LICENSE`, `.gitignore`. Next step (after spec approval): Phase 0 scaffold in `docs/IMPLEMENTATION_PLAN.md`.
+**Implementation started.** Phase 0.1 scaffold is present: Vite, TypeScript, Vitest, Playwright config, ESLint/Prettier, `index.html`, and `src/main.ts`. Next step: Phase 0.2 design tokens + base styles in `docs/IMPLEMENTATION_PLAN.md`.
 
 ## MVP vs v1.1
 - **v1.0:** core create/edit/preview/copy/download, library, all fields + Notes/Substitutions/Storage/Equipment, structured ingredients + paste-parse, grouped steps, fractions/ranges + scaling, tags/source/image-refs, both themes, full a11y, wiki-link/callout toggles, golden-tested serializer.

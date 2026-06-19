@@ -1,0 +1,28 @@
+{
+  "name": "hintof",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --check \"**/*.{html,js,json,ts}\"",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "build": "vite build",
+    "check": "npm run typecheck && npm run lint && npm run test:unit && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^26.0.0",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.9",
+    "yaml": "^2.9.0"
+  }
+}

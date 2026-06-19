@@ -1,0 +1,77 @@
+{
+  "id": "00000000-0000-4000-8000-000000000002",
+  "schemaVersion": 1,
+  "title": "Crème Brûlée",
+  "description": "A make-ahead custard with a brittle caramel top.",
+  "aliases": ["Burnt Cream"],
+  "tags": ["dessert", "make-ahead"],
+  "cuisine": "French",
+  "course": "Dessert",
+  "diet": ["vegetarian"],
+  "servings": 6,
+  "prepTime": 20,
+  "cookTime": 40,
+  "totalTime": 60,
+  "image": "creme-brulee.jpg",
+  "ingredientGroups": [
+    {
+      "name": "Custard",
+      "ingredients": [
+        {
+          "qty": { "kind": "single", "value": { "n": 2, "d": 1 } },
+          "unit": "cups",
+          "item": "heavy cream"
+        },
+        { "item": "1 vanilla bean", "note": "split and scraped" },
+        { "qty": { "kind": "single", "value": { "n": 5, "d": 1 } }, "item": "egg yolks" },
+        { "qty": { "kind": "single", "value": { "n": 1, "d": 2 } }, "unit": "cup", "item": "sugar" }
+      ]
+    },
+    {
+      "name": "Topping",
+      "ingredients": [
+        {
+          "qty": { "kind": "single", "value": { "n": 6, "d": 1 } },
+          "unit": "tbsp",
+          "item": "sugar",
+          "note": "for the caramel"
+        }
+      ]
+    }
+  ],
+  "stepSections": [
+    {
+      "name": "Prep",
+      "steps": [
+        "Heat the cream with the vanilla until steaming; steep 15 min.",
+        "Whisk yolks and sugar until pale."
+      ]
+    },
+    {
+      "name": "Bake",
+      "steps": [
+        "Temper the yolks, strain, divide into ramekins.",
+        "Bake in a water bath at 325°F for 40 min, until just set."
+      ]
+    }
+  ],
+  "notes": "Chill at least 2 hours before torching.",
+  "substitutions": [{ "from": "vanilla bean", "to": "1 tsp vanilla extract" }],
+  "storage": "Keeps 3 days covered in the fridge; torch just before serving.",
+  "equipment": ["6 ramekins", "kitchen torch"],
+  "source": {
+    "name": "Smitten Kitchen",
+    "url": "https://smittenkitchen.com/creme-brulee",
+    "author": "Deb Perelman",
+    "book": "The Smitten Kitchen Cookbook",
+    "page": "112",
+    "adaptedFrom": "Mom's version: less sugar"
+  },
+  "created": "2026-06-19",
+  "updated": "2026-06-19",
+  "options": {
+    "wikiLinks": { "ingredients": false, "cuisine": false },
+    "callouts": false,
+    "fractionStyle": "unicode"
+  }
+}

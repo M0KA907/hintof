@@ -1,0 +1,14 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "schemaVersion": 1,
+  "title": "Weeknight Tomato Soup",
+  "ingredientGroups": [{ "ingredients": [{ "item": "" }] }],
+  "stepSections": [{ "steps": [""] }],
+  "created": "2026-06-19",
+  "updated": "2026-06-19",
+  "options": {
+    "wikiLinks": { "ingredients": false, "cuisine": false },
+    "callouts": false,
+    "fractionStyle": "unicode"
+  }
+}

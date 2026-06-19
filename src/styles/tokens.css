@@ -1,0 +1,146 @@
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --paper: #f5ecdc;
+  --surface: #fbf6ec;
+  --surface-sunk: #efe4d2;
+  --ink: #2a2521;
+  --ink-soft: #5c5247;
+  --ink-faint: #8a7e70;
+  --line: #d9cbb3;
+  --terracotta: #b24e2e;
+  --terracotta-deep: #9a3f22;
+  --rust: #7e3b1e;
+  --teal: #2f6e68;
+  --teal-deep: #265853;
+  --teal-geo: #4a857f;
+  --focus: #2f6e68;
+  --danger: #a33526;
+  --ok: #3e6b3b;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --border: 1px solid var(--line);
+  --shadow-paper: 0 1px 2px rgb(42 37 33 / 6%), 0 6px 18px rgb(42 37 33 / 8%);
+
+  --fs-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.8rem);
+  --fs-sm: clamp(0.85rem, 0.8rem + 0.2vw, 0.9rem);
+  --fs-base: 1rem;
+  --fs-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --fs-lg: clamp(1.2rem, 1.1rem + 0.5vw, 1.4rem);
+  --fs-xl: clamp(1.6rem, 1.4rem + 1vw, 2rem);
+  --fs-2xl: clamp(2rem, 1.7rem + 1.5vw, 2.75rem);
+
+  --font-serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", palatino, serif;
+  --font-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --paper: #1f1b17;
+    --surface: #2a2420;
+    --surface-sunk: #181410;
+    --ink: #efe6d6;
+    --ink-soft: #c3b8a6;
+    --ink-faint: #8e8270;
+    --line: #3c342c;
+    --terracotta: #d97a52;
+    --terracotta-deep: #e08a63;
+    --rust: #c2613a;
+    --teal: #6fb3ac;
+    --teal-deep: #8ac6bf;
+    --teal-geo: #4e8079;
+    --focus: #8ac6bf;
+    --danger: #e0795f;
+    --ok: #7fb069;
+
+    --shadow-paper: 0 1px 2px rgb(0 0 0 / 20%), 0 6px 18px rgb(0 0 0 / 24%);
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: #1f1b17;
+  --surface: #2a2420;
+  --surface-sunk: #181410;
+  --ink: #efe6d6;
+  --ink-soft: #c3b8a6;
+  --ink-faint: #8e8270;
+  --line: #3c342c;
+  --terracotta: #d97a52;
+  --terracotta-deep: #e08a63;
+  --rust: #c2613a;
+  --teal: #6fb3ac;
+  --teal-deep: #8ac6bf;
+  --teal-geo: #4e8079;
+  --focus: #8ac6bf;
+  --danger: #e0795f;
+  --ok: #7fb069;
+
+  --shadow-paper: 0 1px 2px rgb(0 0 0 / 20%), 0 6px 18px rgb(0 0 0 / 24%);
+}
+
+[data-theme="gruvbox-light"] {
+  color-scheme: light;
+
+  --paper: #f8f0dc;
+  --surface: #faf5e8;
+  --surface-sunk: #ede3c9;
+  --ink: #403a34;
+  --ink-soft: #5e574e;
+  --ink-faint: #8c8478;
+  --line: #ddd2ba;
+  --terracotta: #c48818;
+  --terracotta-deep: #a87212;
+  --rust: #8f5a28;
+  --teal: #5b7f78;
+  --teal-deep: #466963;
+  --teal-geo: #6d9588;
+  --focus: #c9952a;
+  --danger: #9a4540;
+  --ok: #6d7040;
+
+  --shadow-paper: 0 1px 2px rgb(64 58 52 / 7%), 0 6px 18px rgb(64 58 52 / 9%);
+}
+
+[data-theme="gruvbox-dark"] {
+  color-scheme: dark;
+
+  --paper: #2c2721;
+  --surface: #363029;
+  --surface-sunk: #211d18;
+  --ink: #e9dcc4;
+  --ink-soft: #cfc1a8;
+  --ink-faint: #9e9180;
+  --line: #4a4339;
+  --terracotta: #d4a52a;
+  --terracotta-deep: #e0b84a;
+  --rust: #b87a30;
+  --teal: #7a9890;
+  --teal-deep: #94b5a8;
+  --teal-geo: #68887a;
+  --focus: #d4af37;
+  --danger: #c97068;
+  --ok: #a8ad6e;
+
+  --shadow-paper: 0 1px 2px rgb(0 0 0 / 20%), 0 6px 18px rgb(0 0 0 / 26%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration: 0ms;
+  }
+}
