@@ -9,6 +9,7 @@ export type IconName =
   | "eye"
   | "copy"
   | "download"
+  | "upload"
   | "save"
   | "chevron-up"
   | "chevron-down"
@@ -17,7 +18,9 @@ export type IconName =
   | "trash"
   | "tick"
   | "palette"
-  | "flame";
+  | "flame"
+  | "graph"
+  | "more";
 
 const SVG_NS = ["http:", "", "www.w3.org", "2000", "svg"].join("/") as "http://www.w3.org/2000/svg";
 
@@ -87,6 +90,13 @@ const BUILDERS: Record<IconName, (svg: SVGSVGElement) => void> = {
       strokeEl("line", { x1: "12", y1: "15", x2: "12", y2: "3" })
     );
   },
+  upload(svg) {
+    svg.append(
+      strokeEl("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+      strokeEl("polyline", { points: "17 8 12 3 7 8" }),
+      strokeEl("line", { x1: "12", y1: "3", x2: "12", y2: "15" })
+    );
+  },
   save(svg) {
     svg.append(strokeEl("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }));
   },
@@ -122,6 +132,21 @@ const BUILDERS: Record<IconName, (svg: SVGSVGElement) => void> = {
   },
   flame(svg) {
     svg.append(strokeEl("path", { d: "M12 22c4-2 8-6 8-11a8 8 0 0 0-16 0c0 5 4 9 8 11z" }));
+  },
+  graph(svg) {
+    svg.append(
+      strokeEl("path", { d: "M7 7.5 11 16M13 16 18 8.5" }),
+      strokeEl("circle", { cx: "5", cy: "6", r: "2" }),
+      strokeEl("circle", { cx: "19", cy: "7", r: "2" }),
+      strokeEl("circle", { cx: "12", cy: "18", r: "2" })
+    );
+  },
+  more(svg) {
+    svg.append(
+      strokeEl("circle", { cx: "5", cy: "12", r: "1" }),
+      strokeEl("circle", { cx: "12", cy: "12", r: "1" }),
+      strokeEl("circle", { cx: "19", cy: "12", r: "1" })
+    );
   }
 };
 
@@ -194,5 +219,11 @@ export const themeIcon: Record<ThemePref, IconName> = {
   light: "sun",
   dark: "moon",
   "gruvbox-light": "palette",
-  "gruvbox-dark": "flame"
+  "gruvbox-dark": "flame",
+  "crocus-light": "palette",
+  "crocus-dark": "flame",
+  "paprika-light": "flame",
+  "sage-light": "palette",
+  "cinnamon-dark": "flame",
+  "peppercorn-dark": "moon"
 };

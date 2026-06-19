@@ -1,11 +1,28 @@
-export type ThemePref = "system" | "light" | "dark" | "gruvbox-light" | "gruvbox-dark";
+export type ThemePref =
+  | "system"
+  | "light"
+  | "dark"
+  | "gruvbox-light"
+  | "gruvbox-dark"
+  | "crocus-light"
+  | "crocus-dark"
+  | "paprika-light"
+  | "sage-light"
+  | "cinnamon-dark"
+  | "peppercorn-dark";
 
 export const THEME_PREFS: ThemePref[] = [
   "system",
   "light",
   "dark",
   "gruvbox-light",
-  "gruvbox-dark"
+  "gruvbox-dark",
+  "crocus-light",
+  "crocus-dark",
+  "paprika-light",
+  "sage-light",
+  "cinnamon-dark",
+  "peppercorn-dark"
 ];
 
 export const THEME_LABELS: Record<ThemePref, string> = {
@@ -13,7 +30,13 @@ export const THEME_LABELS: Record<ThemePref, string> = {
   light: "Light",
   dark: "Dark",
   "gruvbox-light": "Saffron light",
-  "gruvbox-dark": "Saffron dark"
+  "gruvbox-dark": "Saffron dark",
+  "crocus-light": "Crocus light",
+  "crocus-dark": "Crocus dark",
+  "paprika-light": "Paprika",
+  "sage-light": "Sage",
+  "cinnamon-dark": "Cinnamon",
+  "peppercorn-dark": "Peppercorn"
 };
 
 const THEME_KEY = "hintof:theme";

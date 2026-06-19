@@ -1,4 +1,5 @@
 import type { Recipe } from "../model/types";
+import { normalizeRecipe } from "./migrate";
 
 const DRAFT_KEY = "hintof:draft";
 
@@ -6,17 +7,21 @@ export function loadDraft(): Recipe | null {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as Recipe;
+    return normalizeRecipe(JSON.parse(raw) as unknown);
   } catch {
     return null;
   }
 }
 
-export function saveDraft(recipe: Recipe): void {
+export function saveDraft(recipe: Recipe): boolean {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(recipe));
+    const normalized = normalizeRecipe(recipe);
+    if (!normalized) return false;
+    const serialized = JSON.stringify(normalized);
+    localStorage.setItem(DRAFT_KEY, serialized);
+    return localStorage.getItem(DRAFT_KEY) === serialized;
   } catch {
-    // ponytail: quota handling in 3.5; silent fail for now
+    return false;
   }
 }
 

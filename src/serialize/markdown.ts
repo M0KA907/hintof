@@ -10,7 +10,14 @@ import type {
   Substitution
 } from "../model/types";
 
+function positiveInt(value: number | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : undefined;
+}
+
 export function formatMinutes(minutes: number): string {
+  minutes = Math.trunc(minutes);
   if (minutes < 60) return `${minutes} min`;
   const hrs = Math.floor(minutes / 60);
   const rem = minutes % 60;
@@ -20,28 +27,70 @@ export function formatMinutes(minutes: number): string {
 
 function hasMeta(recipe: Recipe): boolean {
   return Boolean(
-    recipe.servings || recipe.prepTime || recipe.cookTime || effectiveTotalTime(recipe)
+    positiveInt(recipe.servings) ||
+    positiveInt(recipe.prepTime) ||
+    positiveInt(recipe.cookTime) ||
+    effectiveTotalTime(recipe)
   );
 }
 
 export function effectiveTotalTime(recipe: Recipe): number | undefined {
-  if (recipe.totalTimeManual && recipe.totalTime) return recipe.totalTime;
-  if (recipe.prepTime && recipe.cookTime) return recipe.prepTime + recipe.cookTime;
-  return recipe.totalTime;
+  const prep = positiveInt(recipe.prepTime);
+  const cook = positiveInt(recipe.cookTime);
+  const total = positiveInt(recipe.totalTime);
+  if (recipe.totalTimeManual && total) return total;
+  if (prep && cook) return prep + cook;
+  return total;
 }
 
 function renderMetaLine(recipe: Recipe): string {
   const parts: string[] = [];
-  if (recipe.servings) parts.push(`**Servings:** ${recipe.servings}`);
-  if (recipe.prepTime) parts.push(`**Prep:** ${formatMinutes(recipe.prepTime)}`);
-  if (recipe.cookTime) parts.push(`**Cook:** ${formatMinutes(recipe.cookTime)}`);
+  const servings = positiveInt(recipe.servings);
+  const prep = positiveInt(recipe.prepTime);
+  const cook = positiveInt(recipe.cookTime);
+  if (servings) parts.push(`**Servings:** ${servings}`);
+  if (prep) parts.push(`**Prep:** ${formatMinutes(prep)}`);
+  if (cook) parts.push(`**Cook:** ${formatMinutes(cook)}`);
   const total = effectiveTotalTime(recipe);
   if (total) parts.push(`**Total:** ${formatMinutes(total)}`);
   return parts.join(" · ");
 }
 
+export function escapeMarkdownText(text: string): string {
+  return text
+    .replace(/\\/g, "\\\\")
+    .replace(/([`*_[\]()<>])/g, "\\$1")
+    .replace(/^(\s*)(#{1,6}\s|>\s?|-{3,}\s*$|\*{3,}\s*$|[-+]\s|\d+\.\s)/gm, "$1\\$2");
+}
+
+export function safeHttpUrl(url: string | undefined): string | null {
+  const raw = url?.trim();
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return raw.replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\s/g, "%20");
+  } catch {
+    return null;
+  }
+}
+
+export function sanitizeObsidianTarget(target: string | undefined): string | null {
+  const clean = target
+    // eslint-disable-next-line no-control-regex -- strip control chars from link targets
+    ?.replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\]\]/g, "")
+    .replace(/\]\(/g, "")
+    .replace(/\[\[/g, "")
+    .trim();
+  if (!clean || /^javascript:/i.test(clean)) return null;
+  return clean;
+}
+
 function wrapWiki(text: string, enabled: boolean): string {
-  return enabled ? `[[${text}]]` : text;
+  if (!enabled) return escapeMarkdownText(text);
+  const target = sanitizeObsidianTarget(text);
+  return target ? `[[${target}]]` : escapeMarkdownText(text);
 }
 
 function renderIngredient(ing: Ingredient, options: NoteOptions): string | null {
@@ -56,7 +105,7 @@ function renderIngredient(ing: Ingredient, options: NoteOptions): string | null 
 
   let line = parts.join(" ");
   const note = ing.note?.trim();
-  if (note) line += ` — ${note}`;
+  if (note) line += ` — ${escapeMarkdownText(note)}`;
   return line;
 }
 
@@ -70,7 +119,7 @@ function renderIngredients(recipe: Recipe): string[] {
 
   for (const group of recipe.ingredientGroups) {
     const groupName = group.name?.trim();
-    if (named && groupName) lines.push(`### ${groupName}`);
+    if (named && groupName) lines.push(`### ${escapeMarkdownText(groupName)}`);
 
     for (const ing of group.ingredients) {
       const row = renderIngredient(ing, recipe.options);
@@ -95,7 +144,7 @@ function renderInstructions(recipe: Recipe): string[] {
   for (const section of recipe.stepSections) {
     const sectionName = section.name?.trim();
     if (named && sectionName) {
-      lines.push(`### ${sectionName}`);
+      lines.push(`### ${escapeMarkdownText(sectionName)}`);
       n = 0;
     }
 
@@ -104,7 +153,7 @@ function renderInstructions(recipe: Recipe): string[] {
       if (!text) continue;
       hasSteps = true;
       n += 1;
-      lines.push(`${n}. ${text}`);
+      lines.push(`${n}. ${escapeMarkdownText(text)}`);
     }
   }
 
@@ -121,9 +170,9 @@ function renderSection(
   if (!text) return [];
 
   if (options.callouts) {
-    return [`> [!${callout}] ${heading}`, `> ${text.replace(/\n/g, "\n> ")}`];
+    return [`> [!${callout}] ${heading}`, `> ${escapeMarkdownText(text).replace(/\n/g, "\n> ")}`];
   }
-  return [`## ${heading}`, text];
+  return [`## ${heading}`, escapeMarkdownText(text)];
 }
 
 function renderSubstitutions(subs: Substitution[]): string[] {
@@ -132,9 +181,9 @@ function renderSubstitutions(subs: Substitution[]): string[] {
       const from = s.from.trim();
       const to = s.to.trim();
       if (!from || !to) return null;
-      let line = `${from} → ${to}`;
+      let line = `${escapeMarkdownText(from)} → ${escapeMarkdownText(to)}`;
       const note = s.note?.trim();
-      if (note) line += ` — ${note}`;
+      if (note) line += ` — ${escapeMarkdownText(note)}`;
       return `- ${line}`;
     })
     .filter((l): l is string => Boolean(l));
@@ -147,7 +196,7 @@ function renderEquipment(items: string[]): string[] {
   const lines = items
     .map((i) => i.trim())
     .filter(Boolean)
-    .map((i) => `- ${i}`);
+    .map((i) => `- ${escapeMarkdownText(i)}`);
   if (!lines.length) return [];
   return ["## Equipment", ...lines];
 }
@@ -156,10 +205,11 @@ export function renderSource(source: Source): string | null {
   const parts: string[] = [];
   const name = source.name?.trim();
   const url = source.url?.trim();
+  const safeUrl = safeHttpUrl(url);
 
-  if (name && url) parts.push(`[${name}](${url})`);
-  else if (name) parts.push(name);
-  else if (url) parts.push(url);
+  if (name && safeUrl) parts.push(`[${escapeMarkdownText(name)}](${safeUrl})`);
+  else if (name) parts.push(escapeMarkdownText(name));
+  else if (url) parts.push(safeUrl ?? escapeMarkdownText(url));
 
   const author = source.author?.trim();
   const book = source.book?.trim();
@@ -167,9 +217,9 @@ export function renderSource(source: Source): string | null {
   const adapted = source.adaptedFrom?.trim();
 
   const detail: string[] = [];
-  if (author) detail.push(author);
-  if (book) detail.push(`*${book}*`);
-  if (page) detail.push(`p. ${page}`);
+  if (author) detail.push(escapeMarkdownText(author));
+  if (book) detail.push(`*${escapeMarkdownText(book)}*`);
+  if (page) detail.push(`p. ${escapeMarkdownText(page)}`);
 
   if (detail.length) {
     const sep = parts.length ? " — " : "";
@@ -178,7 +228,7 @@ export function renderSource(source: Source): string | null {
 
   if (adapted) {
     const prefix = parts.length ? " (adapted: " : "(adapted: ";
-    parts.push(`${prefix}${adapted})`);
+    parts.push(`${prefix}${escapeMarkdownText(adapted)})`);
   }
 
   const line = parts.join("").trim();
@@ -186,12 +236,12 @@ export function renderSource(source: Source): string | null {
 }
 
 export function renderMarkdownBody(recipe: Recipe): string {
-  const lines: string[] = [`# ${recipe.title.trim() || "Untitled"}`];
+  const lines: string[] = [`# ${escapeMarkdownText(recipe.title.trim() || "Untitled")}`];
 
   const desc = recipe.description?.trim();
   if (desc) {
     lines.push("");
-    lines.push(desc);
+    lines.push(escapeMarkdownText(desc));
   }
 
   if (hasMeta(recipe)) {
@@ -202,7 +252,8 @@ export function renderMarkdownBody(recipe: Recipe): string {
   const image = recipe.image?.trim();
   if (image) {
     lines.push("");
-    lines.push(`![[${image}]]`);
+    const target = sanitizeObsidianTarget(image);
+    lines.push(target ? `![[${target}]]` : escapeMarkdownText(image));
   }
 
   const ingredients = renderIngredients(recipe);

@@ -10,11 +10,12 @@ import type {
   Substitution
 } from "../model/types";
 import { emptyRecipe } from "../model/types";
+import { normalizeRecipe } from "../persist/migrate";
 import type { ThemePref } from "../persist/theme";
 import { deleteRecipe, loadLibrary, saveLibrary, upsertRecipe } from "../persist/library";
 
 export type Panel = "write" | "preview";
-export type View = "editor" | "library";
+export type View = "editor" | "library" | "docs";
 
 export interface AppState {
   recipe: Recipe;
@@ -91,7 +92,9 @@ export function setOptions(state: AppState, patch: Partial<NoteOptions>): AppSta
 }
 
 export function loadRecipe(state: AppState, recipe: Recipe): AppState {
-  return { ...state, recipe, view: "editor", panel: "write", status: "" };
+  const normalized = normalizeRecipe(recipe);
+  if (!normalized) return { ...state, status: "Could not open that recipe." };
+  return { ...state, recipe: normalized, view: "editor", panel: "write", status: "" };
 }
 
 export function newRecipe(state: AppState): AppState {
@@ -102,16 +105,27 @@ export function saveToLibrary(state: AppState): AppState {
   if (!state.recipe.title.trim()) {
     return { ...state, status: "Add a title before saving." };
   }
-  const library = upsertRecipe(state.library, touch(state.recipe));
-  saveLibrary(library);
-  return { ...state, library, status: "Saved to library." };
+  const recipe = touch(state.recipe);
+  const library = upsertRecipe(state.library, recipe);
+  const result = saveLibrary(library);
+  return {
+    ...state,
+    recipe,
+    library,
+    status: result.ok ? "Saved to library." : "Storage full — export your library to keep a copy."
+  };
 }
 
 export function removeFromLibrary(state: AppState, id: string): AppState {
   const library = deleteRecipe(state.library, id);
-  saveLibrary(library);
+  const result = saveLibrary(library);
   const recipe = state.recipe.id === id ? emptyRecipe() : state.recipe;
-  return { ...state, library, recipe, status: "Removed from library." };
+  return {
+    ...state,
+    library,
+    recipe,
+    status: result.ok ? "Removed from library." : "Removed here, but storage could not update."
+  };
 }
 
 export function updateIngredient(
@@ -209,6 +223,7 @@ export function moveStep(state: AppState, si: number, from: number, to: number):
 }
 
 export function scaleByServings(state: AppState, target: number): AppState {
+  if (!Number.isInteger(target) || target <= 0) return state;
   const factor = servingsFactor(state.recipe.servings, target);
   if (!factor) return state;
   const groups = state.recipe.ingredientGroups.map((g) => ({

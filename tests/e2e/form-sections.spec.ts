@@ -13,9 +13,14 @@ test("recipe form uses accessible collapsible sections", async ({ page }) => {
   const ingredients = section("Ingredients");
   const source = section("Source");
 
-  await expect(basics).toHaveJSProperty("open", true);
-  await expect(ingredients).toHaveJSProperty("open", true);
+  await expect(basics).toHaveJSProperty("open", false);
+  await expect(ingredients).toHaveJSProperty("open", false);
   await expect(source).toHaveJSProperty("open", false);
+  await expect(page.getByLabel("Title")).toBeHidden();
+
+  await basics.locator("summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(basics).toHaveJSProperty("open", true);
   await expect(page.getByLabel("Title")).toBeVisible();
 
   await source.locator("summary").focus();

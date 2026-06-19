@@ -1,24 +1,40 @@
 import type { Recipe } from "../model/types";
+import { normalizeRecipe } from "./migrate";
 
 const LIBRARY_KEY = "hintof:library";
+
+export type SaveResult = { ok: true } | { ok: false; reason: "unavailable" | "verify-failed" };
 
 export function loadLibrary(): Recipe[] {
   try {
     const raw = localStorage.getItem(LIBRARY_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as Recipe[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(raw) as unknown;
+    const recipes =
+      parsed &&
+      typeof parsed === "object" &&
+      "format" in parsed &&
+      "recipes" in parsed &&
+      Array.isArray((parsed as { recipes?: unknown }).recipes)
+        ? (parsed as { recipes: unknown[] }).recipes
+        : parsed;
+    if (!Array.isArray(recipes)) return [];
+    return recipes.map(normalizeRecipe).filter((recipe): recipe is Recipe => Boolean(recipe));
   } catch {
     return [];
   }
 }
 
-export function saveLibrary(recipes: Recipe[]): boolean {
+export function saveLibrary(recipes: Recipe[]): SaveResult {
   try {
-    localStorage.setItem(LIBRARY_KEY, JSON.stringify(recipes));
-    return true;
+    const normalized = recipes.map(normalizeRecipe).filter((r): r is Recipe => Boolean(r));
+    const serialized = JSON.stringify(normalized);
+    localStorage.setItem(LIBRARY_KEY, serialized);
+    return localStorage.getItem(LIBRARY_KEY) === serialized
+      ? { ok: true }
+      : { ok: false, reason: "verify-failed" };
   } catch {
-    return false;
+    return { ok: false, reason: "unavailable" };
   }
 }
 

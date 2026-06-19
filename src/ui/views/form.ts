@@ -26,6 +26,12 @@ import type { createStore } from "../../store/store";
 
 type Store = ReturnType<typeof createStore<AppState>>;
 
+function parsePositiveInt(value: string): number | undefined {
+  if (!/^\d+$/.test(value.trim())) return undefined;
+  const n = Number(value);
+  return n > 0 ? n : undefined;
+}
+
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   className?: string,
@@ -158,8 +164,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
     "Servings",
     store.get().recipe.servings?.toString() ?? "",
     (v) => {
-      const n = Number(v);
-      store.update((s) => setField(s, "servings", v && n > 0 ? n : undefined));
+      store.update((s) => setField(s, "servings", parsePositiveInt(v)));
     },
     { type: "number" }
   );
@@ -173,8 +178,8 @@ export function mountForm(root: HTMLElement, store: Store): void {
   const scaleBtn = el("button", "btn btn-secondary", "Scale");
   scaleBtn.type = "button";
   scaleBtn.addEventListener("click", () => {
-    const target = Number(scaleInput.value);
-    if (target > 0) store.update((s) => scaleByServings(s, target));
+    const target = parsePositiveInt(scaleInput.value);
+    if (target) store.update((s) => scaleByServings(s, target));
   });
   scaleRow.append(scaleInput, scaleBtn);
 
@@ -183,8 +188,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
     "Prep (min)",
     store.get().recipe.prepTime?.toString() ?? "",
     (v) => {
-      const n = Number(v);
-      store.update((s) => setField(s, "prepTime", v && n > 0 ? n : undefined));
+      store.update((s) => setField(s, "prepTime", parsePositiveInt(v)));
     },
     { type: "number" }
   );
@@ -194,8 +198,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
     "Cook (min)",
     store.get().recipe.cookTime?.toString() ?? "",
     (v) => {
-      const n = Number(v);
-      store.update((s) => setField(s, "cookTime", v && n > 0 ? n : undefined));
+      store.update((s) => setField(s, "cookTime", parsePositiveInt(v)));
     },
     { type: "number" }
   );
@@ -400,7 +403,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
   form.append(
     collapsibleSection(
       "Recipe basics",
-      true,
+      false,
       titleWrap,
       descriptionWrap,
       metaRow,
@@ -410,7 +413,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
       imageWrap
     ),
     collapsibleSection("Source", false, sourceGrid),
-    collapsibleSection("Ingredients", true, pasteWrap, ingList, addIngBtn),
+    collapsibleSection("Ingredients", false, pasteWrap, ingList, addIngBtn),
     collapsibleSection("Instructions", false, stepList, addStepBtn),
     collapsibleSection(
       "Notes & extras",
@@ -520,6 +523,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
         up.addEventListener("click", () => {
           store.update((s) => moveIngredient(s, gi, ii, ii - 1));
           renderIngredients();
+          focusIngredient(Math.max(0, ii - 1));
         });
 
         const down = iconButton("Move ingredient down", "chevron-down");
@@ -527,12 +531,14 @@ export function mountForm(root: HTMLElement, store: Store): void {
         down.addEventListener("click", () => {
           store.update((s) => moveIngredient(s, gi, ii, ii + 1));
           renderIngredients();
+          focusIngredient(ii + 1);
         });
 
         const remove = iconButton("Remove ingredient", "x");
         remove.addEventListener("click", () => {
           store.update((s) => removeIngredient(s, gi, ii));
           renderIngredients();
+          focusIngredient(Math.max(0, ii - 1));
         });
 
         row.append(qty, unit, item, up, down, remove);
@@ -583,6 +589,7 @@ export function mountForm(root: HTMLElement, store: Store): void {
         up.addEventListener("click", () => {
           store.update((s) => moveStep(s, si, ii, ii - 1));
           renderSteps();
+          focusStep(Math.max(0, ii - 1));
         });
 
         const down = iconButton("Move step down", "chevron-down");
@@ -590,12 +597,14 @@ export function mountForm(root: HTMLElement, store: Store): void {
         down.addEventListener("click", () => {
           store.update((s) => moveStep(s, si, ii, ii + 1));
           renderSteps();
+          focusStep(ii + 1);
         });
 
         const remove = iconButton("Remove step", "x");
         remove.addEventListener("click", () => {
           store.update((s) => removeStep(s, si, ii));
           renderSteps();
+          focusStep(Math.max(0, ii - 1));
         });
 
         row.append(num, input, up, down, remove);
@@ -603,6 +612,14 @@ export function mountForm(root: HTMLElement, store: Store): void {
       });
     });
   };
+
+  function focusIngredient(index: number): void {
+    (ingList.querySelectorAll(".item-input").item(index) as HTMLInputElement | null)?.focus();
+  }
+
+  function focusStep(index: number): void {
+    (stepList.querySelectorAll(".step-row input").item(index) as HTMLInputElement | null)?.focus();
+  }
 
   addIngBtn.addEventListener("click", () => {
     store.update(addIngredient);

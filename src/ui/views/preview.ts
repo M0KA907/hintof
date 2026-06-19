@@ -1,13 +1,14 @@
 import { recipeToNote } from "../../serialize";
+import { renderMarkdown } from "./markdown";
 
 export function mountPreview(el: HTMLElement): (text: string) => void {
-  const pre = document.createElement("pre");
-  pre.className = "preview-note";
-  pre.setAttribute("aria-label", "Live Markdown preview");
-  el.append(pre);
+  const note = document.createElement("div");
+  note.className = "note-render";
+  note.setAttribute("aria-label", "Rendered preview");
+  el.append(note);
 
   return (text: string) => {
-    pre.textContent = text;
+    note.replaceChildren(renderMarkdown(text));
   };
 }
 

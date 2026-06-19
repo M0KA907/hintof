@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 
 # Local Claude Code config (not shared)
 .claude/settings.local.json
+
+# Claude handoff/remember session state (transient)
+.remember/

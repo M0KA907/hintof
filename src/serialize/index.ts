@@ -1,5 +1,5 @@
 import type { Recipe } from "../model/types";
-import { effectiveTotalTime } from "./markdown";
+import { effectiveTotalTime, safeHttpUrl } from "./markdown";
 import { renderMarkdownBody } from "./markdown";
 import { isNonEmpty, isNonEmptyList, normalizeTag, yamlBlock, yamlList, yamlString } from "./yaml";
 
@@ -30,14 +30,18 @@ function renderFrontmatter(recipe: Recipe): string {
   if (isNonEmpty(recipe.course)) ordered.push(`course: ${yamlString(recipe.course)}`);
   if (isNonEmptyList(recipe.diet)) ordered.push(...yamlList("diet", recipe.diet));
 
-  if (recipe.servings && recipe.servings > 0) {
-    ordered.push(`servings: ${recipe.servings}`);
+  const servings = positiveInt(recipe.servings);
+  const prep = positiveInt(recipe.prepTime);
+  const cook = positiveInt(recipe.cookTime);
+
+  if (servings) {
+    ordered.push(`servings: ${servings}`);
   }
-  if (recipe.prepTime && recipe.prepTime > 0) {
-    ordered.push(`prep_time: ${recipe.prepTime}`);
+  if (prep) {
+    ordered.push(`prep_time: ${prep}`);
   }
-  if (recipe.cookTime && recipe.cookTime > 0) {
-    ordered.push(`cook_time: ${recipe.cookTime}`);
+  if (cook) {
+    ordered.push(`cook_time: ${cook}`);
   }
 
   const total = effectiveTotalTime(recipe);
@@ -46,7 +50,8 @@ function renderFrontmatter(recipe: Recipe): string {
   const src = recipe.source;
   if (src) {
     if (isNonEmpty(src.name)) ordered.push(`source_name: ${yamlString(src.name)}`);
-    if (isNonEmpty(src.url)) ordered.push(`source_url: ${yamlString(src.url)}`);
+    const sourceUrl = safeHttpUrl(src.url);
+    if (sourceUrl) ordered.push(`source_url: ${yamlString(sourceUrl)}`);
     if (isNonEmpty(src.author)) ordered.push(`source_author: ${yamlString(src.author)}`);
     if (isNonEmpty(src.book)) ordered.push(`source_book: ${yamlString(src.book)}`);
     if (isNonEmpty(src.page)) ordered.push(`source_page: ${yamlString(src.page)}`);
@@ -55,15 +60,14 @@ function renderFrontmatter(recipe: Recipe): string {
     }
   }
 
-  if (recipe.rating && recipe.rating >= 1 && recipe.rating <= 5) {
-    ordered.push(`rating: ${recipe.rating}`);
-  }
-  if (isNonEmptyList(recipe.datesMade)) {
-    ordered.push(...yamlList("date_made", recipe.datesMade));
-  }
-
   ordered.push(`created: ${recipe.created}`);
   ordered.push(`updated: ${recipe.updated}`);
 
   return yamlBlock(ordered);
+}
+
+function positiveInt(value: number | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : undefined;
 }
