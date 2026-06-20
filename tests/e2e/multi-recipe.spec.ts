@@ -19,7 +19,9 @@ async function fillTitle(page: Page, title: string): Promise<void> {
 }
 
 async function save(page: Page): Promise<void> {
+  // Save is now a dropdown pill: open it, then choose "Library".
   await page.locator(".header-actions").getByRole("button", { name: "Save" }).click();
+  await page.getByRole("menuitem", { name: "Library" }).click();
   // autosave debounces the draft 500ms; let it flush so reload restores deterministically
   await page.waitForTimeout(600);
 }

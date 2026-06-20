@@ -71,6 +71,61 @@ h3 {
   margin-left: auto;
 }
 
+/* single bookmark pill that drops down Save / Copy / Download */
+.save-group {
+  position: relative;
+  display: inline-flex;
+}
+
+.save-pill {
+  gap: var(--space-1);
+}
+
+.save-caret-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.save-pill[aria-expanded="true"] .save-caret-icon {
+  transform: rotate(180deg);
+}
+
+.save-menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: var(--space-1);
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-paper);
+}
+
+.save-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  min-height: 44px;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.save-menu-item:hover,
+.save-menu-item:focus-visible {
+  background: var(--surface-sunk);
+}
+
 .header-nav {
   display: flex;
   flex-wrap: wrap;
@@ -843,13 +898,6 @@ textarea.field-input {
   display: none;
 }
 
-.action-bar {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  justify-self: end;
-}
-
 @media (min-width: 1024px) {
   .header-row {
     display: grid;
@@ -1083,7 +1131,7 @@ textarea.field-input {
     font-size: var(--fs-xl);
   }
 
-  /* stack footer: status, full-width pill, then Copy/Download row */
+  /* stack footer: status above the full-width pill */
   .app-footer {
     grid-template-columns: 1fr;
   }
@@ -1096,15 +1144,21 @@ textarea.field-input {
     flex: 1;
   }
 
-  .action-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-    justify-self: stretch;
+  /* keep the wordmark at full size and a clear gap before the action cluster,
+     which wraps to its own line when the row gets tight */
+  .wordmark {
+    flex: 0 0 auto;
+    margin-right: var(--space-3);
   }
 
-  .action-bar .btn {
-    width: 100%;
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .theme-select {
     min-width: 0;
   }
 }

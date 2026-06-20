@@ -19,6 +19,7 @@ import {
   setTheme,
   setView
 } from "./store/actions";
+import type { Recipe } from "./model/types";
 import { createStore } from "./store/store";
 import { createIcon, labeledButton } from "./ui/icons";
 import { mountForm } from "./ui/views/form";
@@ -176,9 +177,88 @@ const headerActions = document.createElement("div");
 headerActions.className = "header-actions";
 const newBtn = labeledButton("New", "plus", "btn btn-secondary");
 newBtn.addEventListener("click", () => store.update(newRecipe));
-const saveBtn = labeledButton("Save", "save", "btn btn-secondary");
-saveBtn.addEventListener("click", () => void saveLive(store));
-headerActions.append(themeSelectWrap, newBtn, saveBtn);
+
+// Single bookmark pill that drops down Save / Copy / Download — one highlighted
+// control instead of three separate buttons.
+function exportRecipe(run: (recipe: Recipe) => void): void {
+  const recipe = store.get().recipe;
+  if (!recipe.title.trim()) {
+    store.update((s) => setStatus(s, "Add a title before exporting."));
+    return;
+  }
+  run(recipe);
+}
+
+const saveGroup = document.createElement("div");
+saveGroup.className = "save-group";
+
+const saveMenu = document.createElement("div");
+saveMenu.id = "save-menu";
+saveMenu.className = "save-menu";
+saveMenu.setAttribute("role", "menu");
+saveMenu.hidden = true;
+
+const saveToggle = labeledButton("Save", "save", "btn btn-primary save-pill");
+saveToggle.append(createIcon("chevron-down", "icon save-caret-icon"));
+saveToggle.setAttribute("aria-haspopup", "menu");
+saveToggle.setAttribute("aria-expanded", "false");
+saveToggle.setAttribute("aria-controls", "save-menu");
+
+function closeSaveMenu(): void {
+  if (saveMenu.hidden) return;
+  saveMenu.hidden = true;
+  saveToggle.setAttribute("aria-expanded", "false");
+  document.removeEventListener("click", onSaveMenuOutside, true);
+  document.removeEventListener("keydown", onSaveMenuKey);
+}
+function openSaveMenu(): void {
+  saveMenu.hidden = false;
+  saveToggle.setAttribute("aria-expanded", "true");
+  document.addEventListener("click", onSaveMenuOutside, true);
+  document.addEventListener("keydown", onSaveMenuKey);
+  (saveMenu.firstElementChild as HTMLElement | null)?.focus();
+}
+function onSaveMenuOutside(e: MouseEvent): void {
+  if (!saveGroup.contains(e.target as Node)) closeSaveMenu();
+}
+function onSaveMenuKey(e: KeyboardEvent): void {
+  if (e.key === "Escape") {
+    closeSaveMenu();
+    saveToggle.focus();
+  }
+}
+saveToggle.addEventListener("click", () => (saveMenu.hidden ? openSaveMenu() : closeSaveMenu()));
+
+const saveItem = labeledButton("Library", "save", "save-menu-item");
+saveItem.setAttribute("role", "menuitem");
+saveItem.addEventListener("click", () => {
+  closeSaveMenu();
+  void saveLive(store);
+});
+
+const copyItem = labeledButton("Copy", "copy", "save-menu-item");
+copyItem.setAttribute("role", "menuitem");
+copyItem.addEventListener("click", () => {
+  closeSaveMenu();
+  exportRecipe(async (recipe) => {
+    const ok = await copyText(recipeToNote(recipe));
+    store.update((s) => setStatus(s, ok ? "Copied to clipboard." : "Copy failed — use Download."));
+  });
+});
+
+const downloadItem = labeledButton("Download", "download", "save-menu-item");
+downloadItem.setAttribute("role", "menuitem");
+downloadItem.addEventListener("click", () => {
+  closeSaveMenu();
+  exportRecipe((recipe) => {
+    downloadText(recipeFilename(recipe.created, recipe.title), recipeToNote(recipe));
+    store.update((s) => setStatus(s, "Download started."));
+  });
+});
+
+saveMenu.append(saveItem, copyItem, downloadItem);
+saveGroup.append(saveToggle, saveMenu);
+headerActions.append(themeSelectWrap, newBtn, saveGroup);
 
 headerRow.append(wordmark, headerPill.el, headerActions);
 header.append(headerRow);
@@ -225,9 +305,6 @@ mountDocs(docsCol);
 main.append(editorView, libraryCol, docsCol);
 shell.append(header, main);
 
-const actions = document.createElement("div");
-actions.className = "action-bar";
-
 const status = document.createElement("p");
 status.className = "status-text";
 status.setAttribute("role", "status");
@@ -240,36 +317,9 @@ storageNote.className = "storage-note";
 storageNote.setAttribute("role", "status");
 storageNote.hidden = true;
 
-const copyBtn = labeledButton("Copy", "copy", "btn btn-primary");
-const downloadBtn = labeledButton("Download", "download", "btn btn-primary");
-
-copyBtn.addEventListener("click", async () => {
-  const recipe = store.get().recipe;
-  if (!recipe.title.trim()) {
-    store.update((s) => setStatus(s, "Add a title before exporting."));
-    return;
-  }
-  const text = recipeToNote(recipe);
-  const ok = await copyText(text);
-  store.update((s) => setStatus(s, ok ? "Copied to clipboard." : "Copy failed — use Download."));
-});
-
-downloadBtn.addEventListener("click", () => {
-  const recipe = store.get().recipe;
-  if (!recipe.title.trim()) {
-    store.update((s) => setStatus(s, "Add a title before exporting."));
-    return;
-  }
-  const text = recipeToNote(recipe);
-  downloadText(recipeFilename(recipe.created, recipe.title), text);
-  store.update((s) => setStatus(s, "Download started."));
-});
-
-actions.append(copyBtn, downloadBtn);
-
 const footer = document.createElement("div");
 footer.className = "app-footer";
-footer.append(storageNote, status, nav, actions);
+footer.append(storageNote, status, nav);
 shell.append(footer);
 app.append(shell);
 
@@ -303,7 +353,6 @@ function syncUi(state: ReturnType<typeof store.get>) {
   editorView.hidden = state.view !== "editor";
   libraryCol.hidden = state.view !== "library";
   docsCol.hidden = state.view !== "docs";
-  actions.hidden = state.view !== "editor";
   if (themeSelect.value !== state.theme) themeSelect.value = state.theme;
 }
 
