@@ -12,6 +12,7 @@ import {
 import { recipeFilename, recipeToNote } from "./serialize";
 import {
   initialState,
+  newRecipe,
   saveToLibrary,
   setPanel,
   setStatus,
@@ -177,9 +178,11 @@ themeSelectWrap.append(themeSelect);
 
 const headerActions = document.createElement("div");
 headerActions.className = "header-actions";
+const newBtn = labeledButton("New", "plus", "btn btn-secondary");
+newBtn.addEventListener("click", () => store.update(newRecipe));
 const saveBtn = labeledButton("Save", "save", "btn btn-secondary");
 saveBtn.addEventListener("click", () => store.update(saveToLibrary));
-headerActions.append(themeSelectWrap, saveBtn);
+headerActions.append(themeSelectWrap, newBtn, saveBtn);
 
 headerRow.append(wordmark, headerPill.el, headerActions);
 header.append(headerRow);
