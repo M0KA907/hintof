@@ -4,7 +4,7 @@ Write a recipe, get a clean Obsidian note.
 
 hintof is a small, fast, fully client-side web tool for turning a structured form into properly formatted, Obsidian-compatible Markdown — with the YAML escaping, safe filenames, and consistent note structure handled for you. It runs entirely in your browser. Nothing you type is ever uploaded anywhere.
 
-> Status: **in active development.** The editor, live preview, and local library work today. A reliability + import roadmap is in progress on a feature branch — an async IndexedDB store with safe localStorage migration, versioned/checksummed backups with restore previews and snapshots, and an opt-in server-side recipe-URL importer. See [`docs/`](docs/) for the full spec set and `.remember/remember.md` for the current build state.
+> Status: **in active development.** The editor, live preview, and local library work today, now backed by an async IndexedDB store (with a safe one-shot localStorage migration), an explicit draft-restore prompt, and versioned/checksummed backups with an import-review screen and pre-replace snapshots. Remaining on the roadmap: source provenance + an output-schema bump, and an opt-in server-side recipe-URL importer. See [`docs/`](docs/) for the full spec set and `.remember/remember.md` for the current build state.
 
 ## Why
 
@@ -18,7 +18,7 @@ If you keep recipes in Obsidian, you've probably hand-written frontmatter and wa
 - Fractions, ranges, and recipe **scaling** by multiplier or target servings.
 - Tags + cuisine/course/diet, structured source/attribution, image references (`![[file.jpg]]`), plus Notes / Substitutions / Storage / Equipment.
 - **Copy** to clipboard or **download** as `YYYY-MM-DD Title.md`.
-- A **local library** of your recipes, autosaved, with JSON import/export for backup and transfer.
+- A **local library** of your recipes, autosaved to an in-browser database, with versioned, checksummed **backup** export and an import-review screen (merge or replace, a snapshot taken before any replace).
 - Light and dark themes; keyboard-first on desktop, touch-first on mobile.
 
 ## Privacy
