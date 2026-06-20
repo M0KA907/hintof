@@ -2,6 +2,7 @@ const RESERVED = new Set(["true", "false", "yes", "no", "null", "~", "on", "off"
 
 const PLAIN_UNSAFE_START = /^[!&*\-?{}[\],#|>@\\"'%]/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const DATE_TIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
 const NUMBER_RE = /^-?\d+(\.\d+)?$/;
 
 function needsQuotes(s: string): boolean {
@@ -13,6 +14,7 @@ function needsQuotes(s: string): boolean {
   if (RESERVED.has(s.toLowerCase())) return true;
   if (NUMBER_RE.test(s)) return true;
   if (DATE_RE.test(s)) return true;
+  if (DATE_TIME_RE.test(s)) return true;
   return false;
 }
 

@@ -70,7 +70,7 @@ hintof/
 ## Data model `[O1, M4, U1]`
 
 ```ts
-type SchemaVersion = 1;
+type SchemaVersion = 1 | 2;
 
 interface Recipe {
   id: string;                 // uuid, stable across edits
@@ -107,7 +107,8 @@ interface Ingredient { qty?: Quantity; unit?: string; item: string; note?: strin
 interface StepSection { name?: string; steps: string[]; }
 interface Substitution { from: string; to: string; note?: string; }
 interface Source {
-  name?: string; url?: string; author?: string; book?: string;
+  name?: string; url?: string; canonicalUrl?: string; publisher?: string;
+  importedAt?: string; parser?: string; author?: string; book?: string;
   page?: string; adaptedFrom?: string;
 }
 

@@ -8,6 +8,7 @@ describe("yaml", () => {
     expect(yamlString("true")).toBe('"true"');
     expect(yamlString("null")).toBe('"null"');
     expect(yamlString("123")).toBe('"123"');
+    expect(yamlString("2026-06-20T12:00:00.000Z")).toBe('"2026-06-20T12:00:00.000Z"');
   });
 
   test("preserves unicode unquoted when safe", () => {

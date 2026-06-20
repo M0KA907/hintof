@@ -20,6 +20,7 @@ export type IconName =
   | "palette"
   | "flame"
   | "graph"
+  | "link"
   | "more";
 
 const SVG_NS = ["http:", "", "www.w3.org", "2000", "svg"].join("/") as "http://www.w3.org/2000/svg";
@@ -141,6 +142,12 @@ const BUILDERS: Record<IconName, (svg: SVGSVGElement) => void> = {
       strokeEl("circle", { cx: "12", cy: "18", r: "2" })
     );
   },
+  link(svg) {
+    svg.append(
+      strokeEl("path", { d: "M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93" }),
+      strokeEl("path", { d: "M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07L13 19.07" })
+    );
+  },
   more(svg) {
     svg.append(
       strokeEl("circle", { cx: "5", cy: "12", r: "1" }),
@@ -218,12 +225,12 @@ export const themeIcon: Record<ThemePref, IconName> = {
   system: "monitor",
   light: "sun",
   dark: "moon",
-  "gruvbox-light": "palette",
-  "gruvbox-dark": "flame",
-  "crocus-light": "palette",
-  "crocus-dark": "flame",
-  "paprika-light": "flame",
-  "sage-light": "palette",
-  "cinnamon-dark": "flame",
+  "gruvbox-light": "sun",
+  "gruvbox-dark": "moon",
+  "crocus-light": "sun",
+  "crocus-dark": "moon",
+  "paprika-light": "sun",
+  "sage-light": "sun",
+  "cinnamon-dark": "moon",
   "peppercorn-dark": "moon"
 };

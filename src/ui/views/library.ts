@@ -43,6 +43,7 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
   const graphBtn = labeledButton("Graph", "graph", "library-pill view-toggle");
   const exportBtn = labeledButton("Export", "download", "library-pill");
   const importBtn = labeledButton("Import", "upload", "library-pill");
+  const linkBtn = labeledButton("Link", "link", "library-pill");
   const newBtn = labeledButton("New", "plus", "btn btn-secondary");
   const importInput = el("input") as HTMLInputElement;
   importInput.type = "file";
@@ -54,9 +55,20 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
   viewStrip.append(listBtn, graphBtn);
   const ioStrip = el("div", "library-pill-strip");
   ioStrip.setAttribute("aria-label", "Library import and export");
-  ioStrip.append(exportBtn, importBtn);
+  ioStrip.append(exportBtn, importBtn, linkBtn);
   toolbar.append(viewStrip, ioStrip, newBtn);
-  header.append(toolbar, importInput);
+
+  const linkPanel = el("form", "library-link-panel");
+  linkPanel.hidden = true;
+  const linkInput = el("input", "field-input library-link-input") as HTMLInputElement;
+  linkInput.type = "url";
+  linkInput.placeholder = "Paste recipe link";
+  linkInput.setAttribute("aria-label", "Recipe link");
+  const linkReviewBtn = labeledButton("Review", "pen", "btn btn-secondary");
+  linkReviewBtn.type = "submit";
+  linkPanel.append(linkInput, linkReviewBtn);
+
+  header.append(toolbar, linkPanel, importInput);
 
   const search = el("input", "library-search field-input") as HTMLInputElement;
   search.type = "search";
@@ -98,6 +110,19 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
     store.update((s) => setStatus(s, "Backup export started."));
   });
   importBtn.addEventListener("click", () => importInput.click());
+  linkBtn.addEventListener("click", () => {
+    linkPanel.hidden = !linkPanel.hidden;
+    if (!linkPanel.hidden) linkInput.focus();
+  });
+  linkPanel.addEventListener("submit", (e) => {
+    e.preventDefault();
+    store.update((s) =>
+      setStatus(
+        s,
+        "Link import needs a fetcher; this GitHub Pages build imports local backup files only."
+      )
+    );
+  });
   importInput.addEventListener("change", async () => {
     const file = importInput.files?.[0];
     importInput.value = "";

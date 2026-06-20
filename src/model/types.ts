@@ -1,4 +1,4 @@
-export type SchemaVersion = 1;
+export type SchemaVersion = 1 | 2;
 
 export type Rational = { n: number; d: number };
 
@@ -38,6 +38,10 @@ export interface Substitution {
 export interface Source {
   name?: string;
   url?: string;
+  canonicalUrl?: string;
+  publisher?: string;
+  importedAt?: string;
+  parser?: string;
   author?: string;
   book?: string;
   page?: string;
@@ -95,7 +99,7 @@ export function emptyRecipe(overrides: Partial<Recipe> = {}): Recipe {
   const today = new Date().toISOString().slice(0, 10);
   return {
     id: uuid(),
-    schemaVersion: 1,
+    schemaVersion: 2,
     title: "",
     ingredientGroups: [{ ingredients: [{ item: "" }] }],
     stepSections: [{ steps: [""] }],

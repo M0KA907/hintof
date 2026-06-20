@@ -7,7 +7,6 @@ import {
   addSubstitution,
   moveIngredient,
   moveStep,
-  pasteIngredients,
   removeIngredient,
   removeStep,
   removeSubstitution,
@@ -43,15 +42,20 @@ function el<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-function collapsibleSection(
-  title: string,
-  open: boolean,
-  ...children: HTMLElement[]
-): HTMLDetailsElement {
-  const details = el("details", "form-section");
-  if (open) details.open = true;
+function formSection(title: string, ...children: HTMLElement[]): HTMLElement {
+  const section = el("section", "form-section");
+  const summary = el("h2", "form-section-title");
+  summary.textContent = title;
+  const body = el("div", "form-section-body");
+  body.append(...children);
+  section.append(summary, body);
+  return section;
+}
+
+function dropdownSection(title: string, ...children: HTMLElement[]): HTMLDetailsElement {
+  const details = el("details", "form-section form-section-dropdown");
   const summary = el("summary", "form-section-summary");
-  summary.append(createIcon("chevron-down", "form-section-chevron"), el("span", "", title));
+  summary.append(el("span", "", title), createIcon("chevron-down", "form-section-chevron"));
   const body = el("div", "form-section-body");
   body.append(...children);
   details.append(summary, body);
@@ -264,20 +268,6 @@ export function mountForm(root: HTMLElement, store: Store): void {
     sourceGrid.append(wrap);
   }
 
-  const pasteWrap = el("details", "paste-details");
-  const pasteSummary = el("summary", "", "Paste ingredients");
-  const pasteArea = el("textarea", "field-input paste-area") as HTMLTextAreaElement;
-  pasteArea.rows = 4;
-  pasteArea.placeholder = "One ingredient per line, e.g.\n2 cups flour\n1 tsp salt";
-  pasteArea.setAttribute("aria-label", "Paste ingredients");
-  const pasteBtn = el("button", "btn btn-secondary", "Parse & add");
-  pasteBtn.type = "button";
-  pasteBtn.addEventListener("click", () => {
-    store.update((s) => pasteIngredients(s, 0, pasteArea.value));
-    pasteArea.value = "";
-    renderIngredients();
-  });
-  pasteWrap.append(pasteSummary, pasteArea, pasteBtn);
   const ingList = el("div", "ingredient-list");
 
   const stepList = el("div", "step-list");
@@ -400,31 +390,36 @@ export function mountForm(root: HTMLElement, store: Store): void {
   const substitutionsBlock = el("div", "list-section");
   substitutionsBlock.append(el("h3", "subsection-title", "Substitutions"), subList, addSubBtn);
 
-  form.append(
-    collapsibleSection(
-      "Recipe basics",
-      false,
-      titleWrap,
-      descriptionWrap,
-      metaRow,
-      scaleRow,
-      taxRow,
-      dietWrap,
-      imageWrap
-    ),
-    collapsibleSection("Source", false, sourceGrid),
-    collapsibleSection("Ingredients", false, pasteWrap, ingList, addIngBtn),
-    collapsibleSection("Instructions", false, stepList, addStepBtn),
-    collapsibleSection(
-      "Notes & extras",
-      false,
-      notesWrap,
-      substitutionsBlock,
-      storageWrap,
-      equipmentWrap
-    ),
-    collapsibleSection("Output options", false, toggleGrid)
+  const recipeBlock = el("div", "form-flow");
+  recipeBlock.append(
+    titleWrap,
+    descriptionWrap,
+    metaRow,
+    scaleRow,
+    taxRow,
+    dietWrap,
+    imageWrap,
+    el("h3", "subsection-title", "Ingredients"),
+    ingList,
+    addIngBtn,
+    el("h3", "subsection-title", "Instructions"),
+    stepList,
+    addStepBtn
   );
+
+  const extrasBlock = el("div", "form-flow");
+  extrasBlock.append(
+    el("h3", "subsection-title", "Source"),
+    sourceGrid,
+    notesWrap,
+    substitutionsBlock,
+    storageWrap,
+    equipmentWrap,
+    el("h3", "subsection-title", "Output options"),
+    toggleGrid
+  );
+
+  form.append(formSection("Recipe", recipeBlock), dropdownSection("Notes & extras", extrasBlock));
   root.append(form);
 
   const renderSubstitutions = () => {

@@ -58,38 +58,50 @@ h3 {
 
 .header-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 /* pill sits next to the wordmark; theme + save cluster pushed to the right */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   margin-left: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.header-actions .btn {
+  padding-inline: var(--space-3);
 }
 
 /* single bookmark pill that drops down Save / Copy / Download */
+.theme-group,
 .save-group {
   position: relative;
   display: inline-flex;
 }
 
+.theme-pill,
 .save-pill {
   gap: var(--space-1);
 }
 
+.theme-caret-icon,
 .save-caret-icon {
   width: 16px;
   height: 16px;
 }
 
+.theme-pill[aria-expanded="true"] .theme-caret-icon,
 .save-pill[aria-expanded="true"] .save-caret-icon {
   transform: rotate(180deg);
 }
 
+.theme-menu,
 .save-menu {
   position: absolute;
   top: calc(100% + var(--space-1));
@@ -105,6 +117,13 @@ h3 {
   box-shadow: var(--shadow-paper);
 }
 
+.theme-menu {
+  min-width: 220px;
+  max-height: min(70dvh, 420px);
+  overflow: auto;
+}
+
+.theme-menu-item,
 .save-menu-item {
   display: flex;
   align-items: center;
@@ -121,8 +140,15 @@ h3 {
   cursor: pointer;
 }
 
+.theme-menu-item:hover,
+.theme-menu-item:focus-visible,
 .save-menu-item:hover,
 .save-menu-item:focus-visible {
+  background: var(--surface-sunk);
+}
+
+.theme-menu-item.is-selected {
+  color: var(--teal-deep);
   background: var(--surface-sunk);
 }
 
@@ -135,48 +161,6 @@ h3 {
 .nav-btn[aria-current="page"] {
   background: var(--surface-sunk);
   border-color: var(--teal);
-}
-
-.theme-select-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.theme-select-wrap::after {
-  content: "";
-  position: absolute;
-  right: var(--space-3);
-  top: 50%;
-  transform: translateY(-35%);
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--ink-soft);
-  pointer-events: none;
-}
-
-.theme-select {
-  appearance: none;
-  font: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--ink);
-  background-color: var(--surface);
-  border: var(--border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) calc(var(--space-5) + var(--space-1)) var(--space-2) var(--space-3);
-  min-height: 44px;
-  max-width: 100%;
-  cursor: pointer;
-}
-
-.theme-select:hover {
-  background-color: var(--surface-sunk);
-}
-
-.theme-select:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
 }
 
 .app-main {
@@ -197,6 +181,9 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 0.08em;
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .app-layout {
@@ -357,7 +344,7 @@ h3 {
   position: relative;
   overflow: hidden;
   border: var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   box-shadow: var(--shadow-paper);
 }
@@ -374,17 +361,29 @@ h3 {
   background: linear-gradient(180deg, var(--crocus), var(--teal-geo));
 }
 
+.form-section-title {
+  margin: 0;
+  padding: var(--space-4) var(--space-5) var(--space-2);
+  font-family: var(--font-serif);
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  color: var(--ink);
+}
+
 .form-section-summary {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
-  cursor: pointer;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 54px;
+  padding: var(--space-3) var(--space-5);
   font-family: var(--font-serif);
-  font-size: var(--fs-md);
-  color: var(--ink);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--surface);
+  background: var(--terracotta);
+  cursor: pointer;
   list-style: none;
-  min-height: 44px;
 }
 
 .form-section-summary::-webkit-details-marker {
@@ -393,30 +392,33 @@ h3 {
 
 .form-section-summary:focus-visible {
   outline: 2px solid var(--focus);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  outline-offset: -4px;
 }
 
 .form-section-chevron {
-  color: var(--ink-soft);
+  flex: 0 0 auto;
   transition: transform 150ms ease;
 }
 
-.form-section[open] .form-section-chevron {
+.form-section-dropdown[open] .form-section-chevron {
   transform: rotate(180deg);
+}
+
+.form-section-dropdown .form-section-body {
+  padding-top: var(--space-4);
 }
 
 .form-section-body {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: 0 var(--space-4) var(--space-4);
+  padding: 0 var(--space-5) var(--space-5);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .form-section-chevron {
-    transition: none;
-  }
+.form-flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .field {
@@ -516,22 +518,6 @@ textarea.field-input {
 .subsection-title {
   font-size: var(--fs-md);
   margin: 0 0 var(--space-2);
-}
-
-.paste-details {
-  margin-bottom: var(--space-3);
-}
-
-.paste-details summary {
-  cursor: pointer;
-  font-size: var(--fs-sm);
-  color: var(--ink-soft);
-  margin-bottom: var(--space-2);
-}
-
-.paste-area {
-  width: 100%;
-  margin-bottom: var(--space-2);
 }
 
 .source-section,
@@ -646,6 +632,17 @@ textarea.field-input {
 
 .library-search {
   width: 100%;
+}
+
+.library-link-panel {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.library-link-input {
+  flex: 1;
+  min-width: 0;
 }
 
 .library-groups {
@@ -1187,7 +1184,7 @@ textarea.field-input {
   }
 
   .wordmark {
-    font-size: var(--fs-xl);
+    font-size: clamp(1.45rem, 7vw, 1.9rem);
   }
 
   /* stack footer: status above the full-width pill */
@@ -1203,22 +1200,31 @@ textarea.field-input {
     flex: 1;
   }
 
-  /* keep the wordmark at full size and a clear gap before the action cluster,
-     which wraps to its own line when the row gets tight */
   .wordmark {
-    flex: 0 0 auto;
-    margin-right: var(--space-3);
+    flex: 1 1 auto;
+    margin-right: var(--space-1);
   }
 
   .header-actions {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
-    row-gap: var(--space-2);
-    min-width: 0;
+    flex: 0 0 auto;
   }
 
-  .theme-select {
-    min-width: 0;
+  .header-actions .btn {
+    min-width: 40px;
+    min-height: 40px;
+    padding: var(--space-2);
+    font-size: var(--fs-sm);
+  }
+
+  .header-actions .btn span {
+    display: none;
+  }
+
+  .theme-menu {
+    right: auto;
+    left: 0;
   }
 }
 

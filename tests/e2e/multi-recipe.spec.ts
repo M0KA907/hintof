@@ -1,20 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const basics = (page: Page) =>
-  page
-    .locator("details.form-section")
-    .filter({ has: page.getByText("Recipe basics", { exact: true }) });
-
-async function openBasics(page: Page): Promise<void> {
-  const section = basics(page);
-  if (!(await section.evaluate((d) => (d as HTMLDetailsElement).open))) {
-    await section.locator("summary").click();
-  }
-  await expect(page.getByLabel("Title")).toBeVisible();
-}
-
 async function fillTitle(page: Page, title: string): Promise<void> {
-  await openBasics(page);
   await page.getByLabel("Title").fill(title);
 }
 

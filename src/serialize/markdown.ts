@@ -206,18 +206,26 @@ export function renderSource(source: Source): string | null {
   const name = source.name?.trim();
   const url = source.url?.trim();
   const safeUrl = safeHttpUrl(url);
+  const canonical = source.canonicalUrl?.trim();
+  const safeCanonical = safeHttpUrl(canonical);
 
   if (name && safeUrl) parts.push(`[${escapeMarkdownText(name)}](${safeUrl})`);
+  else if (name && safeCanonical) parts.push(`[${escapeMarkdownText(name)}](${safeCanonical})`);
   else if (name) parts.push(escapeMarkdownText(name));
   else if (url) parts.push(safeUrl ?? escapeMarkdownText(url));
+  else if (canonical) parts.push(safeCanonical ?? escapeMarkdownText(canonical));
 
   const author = source.author?.trim();
+  const publisher = source.publisher?.trim();
   const book = source.book?.trim();
   const page = source.page?.trim();
   const adapted = source.adaptedFrom?.trim();
+  const importedAt = source.importedAt?.trim();
+  const parser = source.parser?.trim();
 
   const detail: string[] = [];
   if (author) detail.push(escapeMarkdownText(author));
+  if (publisher) detail.push(escapeMarkdownText(publisher));
   if (book) detail.push(`*${escapeMarkdownText(book)}*`);
   if (page) detail.push(`p. ${escapeMarkdownText(page)}`);
 
@@ -229,6 +237,19 @@ export function renderSource(source: Source): string | null {
   if (adapted) {
     const prefix = parts.length ? " (adapted: " : "(adapted: ";
     parts.push(`${prefix}${escapeMarkdownText(adapted)})`);
+  }
+
+  const provenance: string[] = [];
+  if (safeCanonical && safeCanonical !== safeUrl) {
+    provenance.push(`[canonical](${safeCanonical})`);
+  } else if (canonical && !safeCanonical) {
+    provenance.push(`canonical: ${escapeMarkdownText(canonical)}`);
+  }
+  if (importedAt) provenance.push(`imported ${escapeMarkdownText(importedAt)}`);
+  if (parser) provenance.push(`parser: ${escapeMarkdownText(parser)}`);
+  if (provenance.length) {
+    const prefix = parts.length ? " (" : "(";
+    parts.push(`${prefix}${provenance.join("; ")})`);
   }
 
   const line = parts.join("").trim();

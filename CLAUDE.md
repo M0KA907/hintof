@@ -91,15 +91,15 @@ Acceptance criteria met; unit/golden/e2e/a11y tests pass in CI; works light+dark
 In progress on `feat/storage-import-roadmap` (see `.remember/remember.md` for the live handoff): a reliability + import roadmap.
 - Engine (pure/tested with `fake-indexeddb`, dev-only): async `RecipeRepository` — `src/persist/repo/*` (IndexedDB, idempotent transactional localStorage→IDB migration, draft-conflict decision, 5-snapshot retention) and `src/persist/backup.ts` (backup v2 + SHA-256 checksum + restore-preview classification + `applyRestore`); importer/search leaf modules — `src/import/url-guard.ts` (SSRF), `src/import/schema-org.ts` (DOM-free JSON-LD/microdata extractor), `src/search/*` (fuzzy search + unit aliases).
 - Wired into the live app (Phases 2/5/6/7): durable async save via the repo through `src/persist/live.ts` (saving→saved/failed; never reports saved before the IDB transaction; localStorage fallback when IDB is absent); non-blocking draft-restore prompt (`decideDraftRestore`, no `confirm()`); `requestPersistentStorage` after first save; storage-unavailable note; backup v2 export + import-review screen (Merge/Replace/Cancel, snapshot before Replace) replacing the old `io.ts`; Save/Copy/Download consolidated into one bookmark dropdown pill.
-- Not yet wired: source provenance + output-schema bump (Phase 8), Cloudflare Pages `functions/api/import-recipe.ts` (Phases 9/10), import-mapping review for the URL importer (Phase 12), search UI (Phase 13), Playwright-in-CI (Phase 15).
+- Not yet wired: import-mapping review for manually provided structured recipe data (Phase 12), search UI (Phase 13), Playwright-in-CI (Phase 15).
 
 ### Roadmap invariants (do not regress)
 - Never report "saved" before the IndexedDB transaction completes; mark unsaved on failure.
 - Migration is one-shot/idempotent and must never delete or overwrite legacy localStorage.
 - Backups are versioned + checksummed; Replace-restore snapshots first; keep newest 5 snapshots.
-- The URL importer is server-side only: no public CORS proxy, never return raw fetched HTML, re-validate every redirect, keep the SSRF guard strict, never log full URLs.
+- Keep deployment simple: GitHub Pages only. No Cloudflare Pages, serverless functions, public CORS proxy, backend fetcher, or extended deployment target.
 - Imported data enters a review screen before saving; original ingredient lines preserved; spelling fixes are suggestions, never silent mutations.
-- Once the importer ships, qualify the "no external network requests at runtime" invariant (opt-in, explicit submit, same-origin endpoint).
+- Preserve the "no external network requests at runtime" invariant. URL scraping/fetching stays out of scope for the GitHub Pages app.
 
 ## MVP vs v1.1
 - **v1.0:** core create/edit/preview/copy/download, library, all fields + Notes/Substitutions/Storage/Equipment, structured ingredients + paste-parse, grouped steps, fractions/ranges + scaling, tags/source/image-refs, both themes, full a11y, wiki-link/callout toggles, golden-tested serializer.

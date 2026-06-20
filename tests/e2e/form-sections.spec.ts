@@ -1,30 +1,23 @@
 import { expect, test } from "@playwright/test";
 
-test("recipe form uses accessible collapsible sections", async ({ page }) => {
+test("recipe form uses visible section flow", async ({ page }) => {
   await page.goto("/");
 
-  const sections = page.locator("details.form-section");
-  const section = (name: string) => sections.filter({ has: page.getByText(name, { exact: true }) });
+  const recipe = page.locator("section.form-section");
+  const extras = page.locator("details.form-section-dropdown");
 
-  await expect(sections).toHaveCount(6);
-  await expect(sections.locator("summary svg[aria-hidden='true']")).toHaveCount(6);
-
-  const basics = section("Recipe basics");
-  const ingredients = section("Ingredients");
-  const source = section("Source");
-
-  await expect(basics).toHaveJSProperty("open", false);
-  await expect(ingredients).toHaveJSProperty("open", false);
-  await expect(source).toHaveJSProperty("open", false);
-  await expect(page.getByLabel("Title")).toBeHidden();
-
-  await basics.locator("summary").focus();
-  await page.keyboard.press("Enter");
-  await expect(basics).toHaveJSProperty("open", true);
+  await expect(recipe).toHaveCount(1);
+  await expect(extras).toHaveCount(1);
+  await expect(recipe.getByRole("heading", { name: "Recipe" })).toBeVisible();
+  await expect(extras.getByText("Notes & extras", { exact: true })).toBeVisible();
+  await expect(extras).toHaveJSProperty("open", false);
   await expect(page.getByLabel("Title")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ingredients" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Instructions" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Source" })).toBeHidden();
 
-  await source.locator("summary").focus();
-  await page.keyboard.press("Enter");
-  await expect(source).toHaveJSProperty("open", true);
-  await expect(source.getByLabel("Name")).toBeVisible();
+  await extras.locator("summary").click();
+  await expect(extras).toHaveJSProperty("open", true);
+  await expect(page.getByRole("heading", { name: "Source" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Name", exact: true })).toBeVisible();
 });

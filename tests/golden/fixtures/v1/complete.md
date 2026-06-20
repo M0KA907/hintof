@@ -1,5 +1,5 @@
 ---
-schema_version: 2
+schema_version: 1
 title: Crème Brûlée
 aliases:
   - Burnt Cream
@@ -16,10 +16,6 @@ cook_time: 40
 total_time: 60
 source_name: Smitten Kitchen
 source_url: https://smittenkitchen.com/creme-brulee
-source_canonical_url: https://smittenkitchen.com/recipes/creme-brulee
-source_publisher: Smitten Kitchen
-source_imported_at: "2026-06-20T12:00:00.000Z"
-source_parser: json-ld
 source_author: Deb Perelman
 source_book: The Smitten Kitchen Cookbook
 source_page: "112"
@@ -67,4 +63,4 @@ Keeps 3 days covered in the fridge; torch just before serving.
 - kitchen torch
 
 ## Source
-[Smitten Kitchen](https://smittenkitchen.com/creme-brulee) — Deb Perelman, Smitten Kitchen, *The Smitten Kitchen Cookbook*, p. 112 (adapted: Mom's version: less sugar) ([canonical](https://smittenkitchen.com/recipes/creme-brulee); imported 2026-06-20T12:00:00.000Z; parser: json-ld)
+[Smitten Kitchen](https://smittenkitchen.com/creme-brulee) — Deb Perelman, *The Smitten Kitchen Cookbook*, p. 112 (adapted: Mom's version: less sugar)

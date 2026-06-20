@@ -3,7 +3,7 @@ import { normalizeRecipe } from "./migrate";
 import type { StoredDraft } from "./repo/types";
 
 export const BACKUP_VERSION = 2;
-export const RECIPE_SCHEMA_VERSION = 1;
+export const RECIPE_SCHEMA_VERSION = 2;
 
 export interface HintofBackupV2 {
   format: "hintof-backup";

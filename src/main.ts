@@ -21,7 +21,7 @@ import {
 } from "./store/actions";
 import type { Recipe } from "./model/types";
 import { createStore } from "./store/store";
-import { createIcon, labeledButton } from "./ui/icons";
+import { createIcon, labeledButton, setIconButton, themeIcon } from "./ui/icons";
 import { mountForm } from "./ui/views/form";
 import { mountLibrary } from "./ui/views/library";
 import { mountDocs } from "./ui/views/docs";
@@ -147,34 +147,76 @@ const headerPill = makeSegmented(
   { className: "header-pill" }
 );
 
-const themeSelectWrap = document.createElement("label");
-themeSelectWrap.className = "theme-select-wrap";
-
-const themeSelect = document.createElement("select");
-themeSelect.id = "theme-select";
-themeSelect.className = "theme-select";
-themeSelect.setAttribute("aria-label", "Color theme");
-
-for (const pref of THEME_PREFS) {
-  const option = document.createElement("option");
-  option.value = pref;
-  option.textContent = THEME_LABELS[pref];
-  themeSelect.append(option);
-}
-
-themeSelect.value = themePref;
-
-themeSelect.addEventListener("change", () => {
-  const next = themeSelect.value as ThemePref;
-  store.update((s) => setTheme(s, next));
-  applyTheme(next);
-  saveTheme(next);
-});
-
-themeSelectWrap.append(themeSelect);
-
 const headerActions = document.createElement("div");
 headerActions.className = "header-actions";
+
+const themeGroup = document.createElement("div");
+themeGroup.className = "theme-group";
+
+const themeMenu = document.createElement("div");
+themeMenu.id = "theme-menu";
+themeMenu.className = "theme-menu";
+themeMenu.setAttribute("role", "menu");
+themeMenu.hidden = true;
+
+const themeToggle = labeledButton("Theme", themeIcon[themePref], "btn btn-secondary theme-pill");
+themeToggle.append(createIcon("chevron-down", "icon theme-caret-icon"));
+themeToggle.setAttribute("aria-haspopup", "menu");
+themeToggle.setAttribute("aria-expanded", "false");
+themeToggle.setAttribute("aria-controls", "theme-menu");
+
+const themeItems = new Map<ThemePref, HTMLButtonElement>();
+
+function closeThemeMenu(): void {
+  if (themeMenu.hidden) return;
+  themeMenu.hidden = true;
+  themeToggle.setAttribute("aria-expanded", "false");
+  document.removeEventListener("click", onThemeMenuOutside, true);
+  document.removeEventListener("keydown", onThemeMenuKey);
+}
+function openThemeMenu(): void {
+  closeSaveMenu();
+  themeMenu.hidden = false;
+  themeToggle.setAttribute("aria-expanded", "true");
+  document.addEventListener("click", onThemeMenuOutside, true);
+  document.addEventListener("keydown", onThemeMenuKey);
+  themeItems.get(store.get().theme)?.focus();
+}
+function onThemeMenuOutside(e: MouseEvent): void {
+  if (!themeGroup.contains(e.target as Node)) closeThemeMenu();
+}
+function onThemeMenuKey(e: KeyboardEvent): void {
+  if (e.key === "Escape") {
+    closeThemeMenu();
+    themeToggle.focus();
+  }
+}
+function syncThemeMenu(pref: ThemePref): void {
+  setIconButton(themeToggle, themeIcon[pref]);
+  for (const [theme, item] of themeItems) {
+    item.classList.toggle("is-selected", theme === pref);
+    item.setAttribute("aria-checked", String(theme === pref));
+  }
+}
+themeToggle.addEventListener("click", () =>
+  themeMenu.hidden ? openThemeMenu() : closeThemeMenu()
+);
+
+for (const pref of THEME_PREFS) {
+  const item = labeledButton(THEME_LABELS[pref], themeIcon[pref], "theme-menu-item");
+  item.setAttribute("role", "menuitemradio");
+  item.addEventListener("click", () => {
+    closeThemeMenu();
+    store.update((s) => setTheme(s, pref));
+    applyTheme(pref);
+    saveTheme(pref);
+  });
+  themeItems.set(pref, item);
+  themeMenu.append(item);
+}
+
+themeGroup.append(themeToggle, themeMenu);
+
 const newBtn = labeledButton("New", "plus", "btn btn-secondary");
 newBtn.addEventListener("click", () => store.update(newRecipe));
 
@@ -212,6 +254,7 @@ function closeSaveMenu(): void {
   document.removeEventListener("keydown", onSaveMenuKey);
 }
 function openSaveMenu(): void {
+  closeThemeMenu();
   saveMenu.hidden = false;
   saveToggle.setAttribute("aria-expanded", "true");
   document.addEventListener("click", onSaveMenuOutside, true);
@@ -258,7 +301,7 @@ downloadItem.addEventListener("click", () => {
 
 saveMenu.append(saveItem, copyItem, downloadItem);
 saveGroup.append(saveToggle, saveMenu);
-headerActions.append(themeSelectWrap, newBtn, saveGroup);
+headerActions.append(themeGroup, newBtn, saveGroup);
 
 headerRow.append(wordmark, headerPill.el, headerActions);
 header.append(headerRow);
@@ -353,7 +396,7 @@ function syncUi(state: ReturnType<typeof store.get>) {
   editorView.hidden = state.view !== "editor";
   libraryCol.hidden = state.view !== "library";
   docsCol.hidden = state.view !== "docs";
-  if (themeSelect.value !== state.theme) themeSelect.value = state.theme;
+  syncThemeMenu(state.theme);
 }
 
 store.subscribe(syncUi);
@@ -408,6 +451,6 @@ document.addEventListener("keydown", (e) => {
   eggBuf = (eggBuf + e.key.toLowerCase()).slice(-5);
   if (eggBuf !== "vt100") return;
   const root = document.documentElement;
-  if (root.getAttribute("data-theme") === "vt100") applyTheme(themeSelect.value as ThemePref);
+  if (root.getAttribute("data-theme") === "vt100") applyTheme(store.get().theme);
   else root.setAttribute("data-theme", "vt100");
 });

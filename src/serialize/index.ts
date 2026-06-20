@@ -52,6 +52,12 @@ function renderFrontmatter(recipe: Recipe): string {
     if (isNonEmpty(src.name)) ordered.push(`source_name: ${yamlString(src.name)}`);
     const sourceUrl = safeHttpUrl(src.url);
     if (sourceUrl) ordered.push(`source_url: ${yamlString(sourceUrl)}`);
+    const canonicalUrl = safeHttpUrl(src.canonicalUrl);
+    if (canonicalUrl) ordered.push(`source_canonical_url: ${yamlString(canonicalUrl)}`);
+    if (isNonEmpty(src.publisher)) ordered.push(`source_publisher: ${yamlString(src.publisher)}`);
+    if (isNonEmpty(src.importedAt))
+      ordered.push(`source_imported_at: ${yamlString(src.importedAt)}`);
+    if (isNonEmpty(src.parser)) ordered.push(`source_parser: ${yamlString(src.parser)}`);
     if (isNonEmpty(src.author)) ordered.push(`source_author: ${yamlString(src.author)}`);
     if (isNonEmpty(src.book)) ordered.push(`source_book: ${yamlString(src.book)}`);
     if (isNonEmpty(src.page)) ordered.push(`source_page: ${yamlString(src.page)}`);

@@ -2,7 +2,7 @@
 
 > **This document defines a versioned, tested public contract.** The exact bytes hintof emits are governed here. Changes to it require a `schema_version` bump and a migration (see *Versioning*). Every rule below is backed by a golden-file test `[T4, S2]`.
 
-Current `schema_version`: **1**.
+Current `schema_version`: **2**.
 
 ## Design principles `[O1, O2, O6, O5]`
 
@@ -19,7 +19,7 @@ All keys are lower_snake_case. Order is fixed (below) for stable diffs.
 
 | Key | Type | Required | Notes |
 |-----|------|----------|-------|
-| `schema_version` | integer | **always** | Currently `1`. |
+| `schema_version` | integer | **always** | Currently `2`. |
 | `title` | string | **always** | The recipe title. Quoted per escaping rules. |
 | `aliases` | list<string> | optional | Alternate names; useful for Obsidian search. Omitted if empty. |
 | `tags` | list<string> | optional | Free tags. Normalized: lowercased, spaces→`-`, no leading `#`. Omitted if empty. |
@@ -32,6 +32,10 @@ All keys are lower_snake_case. Order is fixed (below) for stable diffs.
 | `total_time` | integer | optional | **Minutes.** Auto-filled as `prep+cook` if both present and not overridden. |
 | `source_name` | string | optional | Display name of the source. |
 | `source_url` | string | optional | URL. |
+| `source_canonical_url` | string | optional | Canonical HTTP(S) URL found during import. |
+| `source_publisher` | string | optional | Publisher/site name found during import. |
+| `source_imported_at` | string | optional | ISO timestamp for an explicit URL import. |
+| `source_parser` | string | optional | Parser that produced imported data, e.g. `json-ld` or `microdata`. |
 | `source_author` | string | optional | |
 | `source_book` | string | optional | |
 | `source_page` | string | optional | Kept as string (can be `12-13`, `xiv`). |
@@ -113,8 +117,8 @@ Rules:
 - **Ingredient rows**: `qty`, `unit`, `item` joined with single spaces, skipping any empty part; a per-ingredient note is appended as ` — note`. Quantities render in the user's fraction style (see below).
 - **Ingredient groups / step sections** only appear when the user defined them; otherwise the list is flat under the section heading `[O2, W4]`.
 - **Substitutions** render as `original → replacement` lines.
-- **Source** renders the present fields into one readable line, e.g.:
-  `[Smitten Kitchen](https://…) — Deb Perelman, *The Smitten Kitchen Cookbook*, p. 112 (adapted)`
+- **Source** renders the present fields into one readable line. Source links are Markdown links only when their protocol is `http` or `https`; other protocols render as escaped plain text. Import provenance is appended in parentheses, e.g.:
+  `[Smitten Kitchen](https://…) — Deb Perelman, Smitten Kitchen, *The Smitten Kitchen Cookbook*, p. 112 (adapted) ([canonical](https://…); imported 2026-06-20T12:00:00.000Z; parser: json-ld)`
 
 ### Fraction & range rendering `[U1]`
 
@@ -156,7 +160,7 @@ Title only, created 2026-06-19:
 
 ```markdown
 ---
-schema_version: 1
+schema_version: 2
 title: Weeknight Tomato Soup
 created: 2026-06-19
 updated: 2026-06-19
@@ -169,7 +173,7 @@ updated: 2026-06-19
 
 ```markdown
 ---
-schema_version: 1
+schema_version: 2
 title: "Crème Brûlée"
 aliases:
   - Burnt Cream
@@ -186,6 +190,10 @@ cook_time: 40
 total_time: 60
 source_name: Smitten Kitchen
 source_url: "https://smittenkitchen.com/creme-brulee"
+source_canonical_url: "https://smittenkitchen.com/recipes/creme-brulee"
+source_publisher: Smitten Kitchen
+source_imported_at: "2026-06-20T12:00:00.000Z"
+source_parser: json-ld
 source_author: Deb Perelman
 source_book: The Smitten Kitchen Cookbook
 source_page: "112"
@@ -235,7 +243,7 @@ Keeps 3 days covered in the fridge; torch just before serving.
 - kitchen torch
 
 ## Source
-[Smitten Kitchen](https://smittenkitchen.com/creme-brulee) — Deb Perelman, *The Smitten Kitchen Cookbook*, p. 112 (adapted: Mom's version: less sugar)
+[Smitten Kitchen](https://smittenkitchen.com/creme-brulee) — Deb Perelman, Smitten Kitchen, *The Smitten Kitchen Cookbook*, p. 112 (adapted: Mom's version: less sugar) ([canonical](https://smittenkitchen.com/recipes/creme-brulee); imported 2026-06-20T12:00:00.000Z; parser: json-ld)
 ```
 
 Note how `:` in the title and `adapted_from` forces double-quoting, while `Crème Brûlée` keeps its unicode unescaped.
@@ -249,7 +257,7 @@ This is the **internal** structured format — separate from the per-note Markdo
 ```jsonc
 {
   "format": "hintof-library",
-  "schema_version": 1,
+  "schema_version": 2,
   "exported_at": "2026-06-19T12:00:00Z",
   "recipes": [ /* array of Recipe objects, see TECHNICAL_SPEC.md data model */ ]
 }
@@ -262,6 +270,7 @@ Import rules: validate `format` and `schema_version`; migrate forward if older `
 ## Versioning & migration `[O7, R3]`
 
 - `schema_version` is an integer, bumped on **any** change to frontmatter keys, body structure, filename rules, or escaping that changes emitted bytes.
+- v2 adds source provenance fields (`source_canonical_url`, `source_publisher`, `source_imported_at`, `source_parser`) and migrates v1 recipes forward on read.
 - Each bump ships a forward migration `N → N+1` for both the per-recipe data and the library JSON.
 - Migrations are **non-destructive**: stored data is migrated in memory on load; the on-disk/localStorage copy is only rewritten on a user-initiated save, and a pre-migration export is offered.
 - Golden-file fixtures exist per version; old fixtures are kept to prove migrations and backward-readability.

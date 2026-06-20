@@ -1,6 +1,6 @@
 {
   "id": "00000000-0000-4000-8000-000000000002",
-  "schemaVersion": 2,
+  "schemaVersion": 1,
   "title": "Crème Brûlée",
   "description": "A make-ahead custard with a brittle caramel top.",
   "aliases": ["Burnt Cream"],
@@ -62,10 +62,6 @@
   "source": {
     "name": "Smitten Kitchen",
     "url": "https://smittenkitchen.com/creme-brulee",
-    "canonicalUrl": "https://smittenkitchen.com/recipes/creme-brulee",
-    "publisher": "Smitten Kitchen",
-    "importedAt": "2026-06-20T12:00:00.000Z",
-    "parser": "json-ld",
     "author": "Deb Perelman",
     "book": "The Smitten Kitchen Cookbook",
     "page": "112",

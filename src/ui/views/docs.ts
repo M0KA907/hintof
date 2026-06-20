@@ -17,9 +17,9 @@ const DOCS: DocEntry[] = [
 hintof turns a recipe form into an Obsidian-ready Markdown note.
 
 1. Open Write.
-2. Open the section you need.
-3. Add a title. Everything else is optional.
-4. Add ingredients, instructions, source details, notes, storage, or equipment as needed.
+2. Add a title. Everything else is optional.
+3. Add ingredients and instructions in Recipe.
+4. Open Notes & extras for source details, notes, storage, equipment, or output options.
 5. Open Preview on mobile, or read the live preview on the right on desktop.
 6. Use Copy to put the Markdown on your clipboard, or Download to save a .md file.
 
@@ -35,21 +35,15 @@ Blank optional fields are left out of the note. hintof does not emit empty headi
     summary: "What each form section is for and how to keep output clean.",
     body: `# Writing recipes
 
-## Recipe basics
+## Recipe
 
-Use this for the title, description, servings, prep time, cook time, tags, cuisine, course, diet, and image filename.
+Use this for the title, description, servings, prep time, cook time, tags, cuisine, course, diet, image filename, ingredients, and instructions.
 
 Servings and times accept whole positive numbers only. Times are stored as minutes.
-
-## Source
-
-Add the original recipe link, author, book, page, or adaptation note. Web links must use http or https. Unsafe links are shown as plain text instead of clickable Markdown.
 
 ## Ingredients
 
 Enter quantity, unit, and item in separate fields. Press Enter in an ingredient item field to add the next ingredient.
-
-Use Paste ingredients when you have a simple list. If a line cannot be parsed safely, hintof keeps it as plain ingredient text.
 
 ## Instructions
 
@@ -57,7 +51,7 @@ Add one step per row. Press Enter in a step field to add the next step.
 
 ## Notes and extras
 
-Use Notes for cooking reminders, Substitutions for swaps, Storage for keeping instructions, and Equipment for tools.
+Add the original recipe link, author, book, page, adaptation note, cooking reminders, substitutions, storage instructions, equipment, and output options here. Web links must use http or https. Unsafe links are shown as plain text instead of clickable Markdown.
 
 ## Output options
 

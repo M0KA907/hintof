@@ -125,7 +125,18 @@ function substitutions(value: unknown): Substitution[] | undefined {
 function source(value: unknown): Source | undefined {
   if (!isRecord(value)) return undefined;
   const next: Source = {};
-  for (const key of ["name", "url", "author", "book", "page", "adaptedFrom"] as const) {
+  for (const key of [
+    "name",
+    "url",
+    "canonicalUrl",
+    "publisher",
+    "importedAt",
+    "parser",
+    "author",
+    "book",
+    "page",
+    "adaptedFrom"
+  ] as const) {
     const raw = value[key];
     if (typeof raw === "string" && raw.trim()) next[key] = raw;
   }
@@ -154,14 +165,14 @@ function noteOptions(value: unknown): NoteOptions {
 
 export function normalizeRecipe(value: unknown): Recipe | null {
   if (!isRecord(value)) return null;
-  if (value.schemaVersion !== 1) return null;
+  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) return null;
   if (typeof value.id !== "string" || !value.id.trim()) return null;
   if (typeof value.title !== "string") return null;
 
   const fallback = emptyRecipe({ id: value.id, title: value.title });
   const recipe: Recipe = {
     ...fallback,
-    schemaVersion: 1,
+    schemaVersion: 2,
     title: value.title,
     description: str(value.description),
     aliases: strList(value.aliases),

@@ -158,7 +158,7 @@ export class IdbRecipeRepository implements RecipeRepository {
       id: uuid(),
       createdAt: new Date().toISOString(),
       reason,
-      recipeSchemaVersion: 1,
+      recipeSchemaVersion: 2,
       recipes,
       draft
     };

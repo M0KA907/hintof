@@ -57,7 +57,7 @@ The author is treated as the "must never annoy" power-user persona.
 - **FR-7** Recipe scaling by multiplier or target servings recomputes ingredient quantities live; ranges scale at both ends; results render in readable fractions `[U2]`.
 - **FR-8** Durations: structured prep / cook / total time fields. No live/interactive countdown `[U3]`.
 - **FR-9** Tags: free-text tags with autocomplete from previously-used tags, plus optional structured `cuisine`, `course`, and `diet` fields `[M1]`.
-- **FR-10** Source/attribution: optional structured fields — URL, author, book title, page, "adapted from" `[M2]`.
+- **FR-10** Source/attribution: optional structured fields — URL, canonical URL, publisher, import timestamp/parser, author, book title, page, "adapted from" `[M2]`.
 - **FR-11** Images: referenced by filename, emitted as an Obsidian embed `![[file.jpg]]`. No upload, no hosting `[M3]`.
 - **FR-12** Optional sections in v1.0: Notes, Substitutions, Storage, Equipment `[M4]`.
 

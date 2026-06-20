@@ -1,4 +1,5 @@
-// SSRF-safe URL validator for a future server-side recipe importer.
+// SSRF-safe URL validator retained for external tooling experiments only.
+// The GitHub Pages app does not fetch user-supplied URLs or ship a backend.
 //
 // This module is pure and synchronous. It performs syntactic checks and
 // literal-host / literal-IP classification only.
