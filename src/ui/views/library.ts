@@ -41,7 +41,7 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
 
   const listBtn = labeledButton("List", "library", "library-pill view-toggle");
   const graphBtn = labeledButton("Graph", "graph", "library-pill view-toggle");
-  const exportBtn = labeledButton("Export", "download", "library-pill");
+  const exportBtn = labeledButton("Export library", "download", "library-pill");
   const importBtn = labeledButton("Import", "upload", "library-pill");
   const linkBtn = labeledButton("Link", "link", "library-pill");
   const newBtn = labeledButton("New", "plus", "btn btn-secondary");
@@ -106,7 +106,11 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
   newBtn.addEventListener("click", () => store.update(newRecipe));
   exportBtn.addEventListener("click", async () => {
     const backup = await exportBackupLive(store);
-    downloadText("hintof-backup.json", JSON.stringify(backup, null, 2));
+    downloadText(
+      "hintof-backup.json",
+      JSON.stringify(backup, null, 2),
+      "application/json;charset=utf-8"
+    );
     store.update((s) => setStatus(s, "Backup export started."));
   });
   importBtn.addEventListener("click", () => importInput.click());

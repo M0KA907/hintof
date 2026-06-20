@@ -15,6 +15,8 @@ export type IconName =
   | "chevron-down"
   | "x"
   | "plus"
+  | "minus"
+  | "reset"
   | "trash"
   | "tick"
   | "palette"
@@ -112,6 +114,15 @@ const BUILDERS: Record<IconName, (svg: SVGSVGElement) => void> = {
   },
   plus(svg) {
     svg.append(strokeEl("path", { d: "M12 5v14M5 12h14" }));
+  },
+  minus(svg) {
+    svg.append(strokeEl("path", { d: "M5 12h14" }));
+  },
+  reset(svg) {
+    svg.append(
+      strokeEl("path", { d: "M3 12a9 9 0 1 0 3-6.7" }),
+      strokeEl("path", { d: "M3 3v6h6" })
+    );
   },
   trash(svg) {
     svg.append(
