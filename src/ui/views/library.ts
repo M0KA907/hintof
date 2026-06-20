@@ -1,9 +1,9 @@
-import { loadRecipe, newRecipe, removeFromLibrary, setStatus } from "../../store/actions";
+import { loadRecipe, newRecipe, setStatus } from "../../store/actions";
 import type { createStore } from "../../store/store";
 import type { AppState } from "../../store/actions";
 import { downloadText } from "../../export/download";
 import { createLibraryExport, parseLibraryJson } from "../../persist/io";
-import { saveLibrary } from "../../persist/library";
+import { removeLive, replaceLibraryLive } from "../../persist/live";
 import { labeledButton } from "../icons";
 import { createGraph } from "./graph";
 
@@ -93,17 +93,18 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
       ? "replace"
       : "merge";
     const result = parseLibraryJson(await file.text(), store.get().library, mode);
-    const saved = saveLibrary(result.recipes);
+    const ok = await replaceLibraryLive(store, result.recipes);
     const report = result.quarantined.length
       ? ` ${result.quarantined.length} invalid entr${result.quarantined.length === 1 ? "y" : "ies"} quarantined.`
       : "";
-    store.update((s) => ({
-      ...s,
-      library: result.recipes,
-      status: saved.ok
-        ? `Imported ${result.imported}; updated ${result.updated}.${report}`
-        : "Imported here, but storage could not update. Export your library to keep a copy."
-    }));
+    store.update((s) =>
+      setStatus(
+        s,
+        ok
+          ? `Imported ${result.imported}; updated ${result.updated}.${report}`
+          : "Imported here, but storage could not update. Export your library to keep a copy."
+      )
+    );
   });
 
   // ponytail: mobile shows one pill at a time (CSS scroll-snap). Tapping the
@@ -141,7 +142,7 @@ export function mountLibrary(root: HTMLElement, store: Store): () => void {
     const deleteBtn = labeledButton("Delete", "trash", "btn btn-secondary");
     deleteBtn.addEventListener("click", () => {
       if (confirm(`Delete "${recipe.title || "Untitled"}"?`)) {
-        store.update((s) => removeFromLibrary(s, recipe.id));
+        void removeLive(store, recipe.id);
       }
     });
     actions.append(openBtn, deleteBtn);

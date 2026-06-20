@@ -1,6 +1,6 @@
 import { copyText } from "./export/clipboard";
 import { downloadText } from "./export/download";
-import { autosave, loadDraft } from "./persist/autosave";
+import { autosaveDraftLive, clearDraftLive, initLive, saveLive } from "./persist/live";
 import {
   applyTheme,
   loadTheme,
@@ -12,8 +12,8 @@ import {
 import { recipeFilename, recipeToNote } from "./serialize";
 import {
   initialState,
+  loadRecipe,
   newRecipe,
-  saveToLibrary,
   setPanel,
   setStatus,
   setTheme,
@@ -32,11 +32,7 @@ if (!app) throw new Error("#app missing");
 const themePref = loadTheme();
 applyTheme(themePref);
 
-const draft = loadDraft();
 const store = createStore({ ...initialState(), theme: themePref });
-if (draft?.title !== undefined) {
-  store.update((s) => ({ ...s, recipe: draft }));
-}
 
 const shell = document.createElement("div");
 shell.className = "app-shell";
@@ -181,7 +177,7 @@ headerActions.className = "header-actions";
 const newBtn = labeledButton("New", "plus", "btn btn-secondary");
 newBtn.addEventListener("click", () => store.update(newRecipe));
 const saveBtn = labeledButton("Save", "save", "btn btn-secondary");
-saveBtn.addEventListener("click", () => store.update(saveToLibrary));
+saveBtn.addEventListener("click", () => void saveLive(store));
 headerActions.append(themeSelectWrap, newBtn, saveBtn);
 
 headerRow.append(wordmark, headerPill.el, headerActions);
@@ -237,6 +233,13 @@ status.className = "status-text";
 status.setAttribute("role", "status");
 status.setAttribute("aria-live", "polite");
 
+const STORAGE_UNAVAILABLE =
+  "This browser can't store recipes here — copy or download to keep your work.";
+const storageNote = document.createElement("p");
+storageNote.className = "storage-note";
+storageNote.setAttribute("role", "status");
+storageNote.hidden = true;
+
 const copyBtn = labeledButton("Copy", "copy", "btn btn-primary");
 const downloadBtn = labeledButton("Download", "download", "btn btn-primary");
 
@@ -266,7 +269,7 @@ actions.append(copyBtn, downloadBtn);
 
 const footer = document.createElement("div");
 footer.className = "app-footer";
-footer.append(status, nav, actions);
+footer.append(storageNote, status, nav, actions);
 shell.append(footer);
 app.append(shell);
 
@@ -289,8 +292,10 @@ function showStatus(msg: string) {
 
 function syncUi(state: ReturnType<typeof store.get>) {
   setPreview(previewText(state.recipe));
-  autosave(state.recipe);
+  autosaveDraftLive(state.recipe);
   showStatus(state.status);
+  storageNote.textContent = state.storageStatus === "unavailable" ? STORAGE_UNAVAILABLE : "";
+  storageNote.hidden = state.storageStatus !== "unavailable";
   footerPill.sync(state);
   headerPill.sync(state);
   shell.dataset.panel = state.panel;
@@ -304,6 +309,47 @@ function syncUi(state: ReturnType<typeof store.get>) {
 
 store.subscribe(syncUi);
 syncUi(store.get());
+
+// Non-blocking draft-restore prompt (replaces the old auto-restore). Shown only
+// when a stored draft diverges from what's saved; the user decides explicitly.
+const restoreBanner = document.createElement("div");
+restoreBanner.className = "restore-banner";
+restoreBanner.setAttribute("role", "region");
+restoreBanner.setAttribute("aria-label", "Restore unsaved draft");
+restoreBanner.hidden = true;
+editorView.prepend(restoreBanner);
+
+function dismissRestore() {
+  restoreBanner.hidden = true;
+  restoreBanner.replaceChildren();
+}
+
+function showRestorePrompt(draftRecipe: import("./model/types").Recipe) {
+  const text = document.createElement("p");
+  text.className = "restore-text";
+  text.textContent = draftRecipe.title.trim()
+    ? `You have unsaved changes to “${draftRecipe.title}”.`
+    : "You have an unsaved draft.";
+  const restore = labeledButton("Restore", "pen", "btn btn-primary");
+  restore.addEventListener("click", () => {
+    store.update((s) => loadRecipe(s, draftRecipe));
+    dismissRestore();
+  });
+  const discard = labeledButton("Discard", "trash", "btn btn-secondary");
+  discard.addEventListener("click", () => {
+    void clearDraftLive();
+    dismissRestore();
+  });
+  const row = document.createElement("div");
+  row.className = "restore-actions";
+  row.append(restore, discard);
+  restoreBanner.replaceChildren(text, row);
+  restoreBanner.hidden = false;
+}
+
+void initLive(store).then((decision) => {
+  if (decision?.action === "prompt") showRestorePrompt(decision.draft.recipe);
+});
 
 // easter egg: type "vt100" anywhere to toggle a secret phosphor-terminal theme.
 // not persisted and not in the picker — selecting any real theme restores it.

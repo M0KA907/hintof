@@ -12,7 +12,8 @@ import type {
 import { emptyRecipe } from "../model/types";
 import { normalizeRecipe } from "../persist/migrate";
 import type { ThemePref } from "../persist/theme";
-import { deleteRecipe, loadLibrary, saveLibrary, upsertRecipe } from "../persist/library";
+import { deleteRecipe, loadLibrary, upsertRecipe } from "../persist/library";
+import type { StorageStatus } from "../persist/repo/types";
 
 export type Panel = "write" | "preview";
 export type View = "editor" | "library" | "docs";
@@ -24,6 +25,7 @@ export interface AppState {
   view: View;
   theme: ThemePref;
   status: string;
+  storageStatus: StorageStatus;
 }
 
 export function initialState(): AppState {
@@ -33,7 +35,8 @@ export function initialState(): AppState {
     panel: "write",
     view: "editor",
     theme: "system",
-    status: ""
+    status: "",
+    storageStatus: "initializing"
   };
 }
 
@@ -101,31 +104,41 @@ export function newRecipe(state: AppState): AppState {
   return { ...state, recipe: emptyRecipe(), view: "editor", panel: "write", status: "" };
 }
 
-export function saveToLibrary(state: AppState): AppState {
-  if (!state.recipe.title.trim()) {
-    return { ...state, status: "Add a title before saving." };
-  }
+/** Optimistic in-memory save. Durability is confirmed later by `finishSave`. */
+export function beginSave(state: AppState): AppState {
   const recipe = touch(state.recipe);
-  const library = upsertRecipe(state.library, recipe);
-  const result = saveLibrary(library);
   return {
     ...state,
     recipe,
-    library,
-    status: result.ok ? "Saved to library." : "Storage full — export your library to keep a copy."
+    library: upsertRecipe(state.library, recipe),
+    status: "Saving…",
+    storageStatus: "saving"
   };
 }
 
-export function removeFromLibrary(state: AppState, id: string): AppState {
-  const library = deleteRecipe(state.library, id);
-  const result = saveLibrary(library);
-  const recipe = state.recipe.id === id ? emptyRecipe() : state.recipe;
+/** Report the outcome once the storage transaction settles. */
+export function finishSave(state: AppState, ok: boolean): AppState {
   return {
     ...state,
-    library,
-    recipe,
-    status: result.ok ? "Removed from library." : "Removed here, but storage could not update."
+    status: ok ? "Saved to library." : "Couldn't save — your changes are unsaved.",
+    storageStatus: ok ? "saved" : "failed"
   };
+}
+
+/** Pure in-memory removal; persistence + status are handled by the caller. */
+export function removeFromLibrary(state: AppState, id: string): AppState {
+  const library = deleteRecipe(state.library, id);
+  const recipe = state.recipe.id === id ? emptyRecipe() : state.recipe;
+  return { ...state, library, recipe };
+}
+
+/** Replace the library wholesale (e.g. after loading it from IndexedDB). */
+export function setLibrary(state: AppState, library: Recipe[]): AppState {
+  return { ...state, library };
+}
+
+export function setStorageStatus(state: AppState, storageStatus: StorageStatus): AppState {
+  return { ...state, storageStatus };
 }
 
 export function updateIngredient(

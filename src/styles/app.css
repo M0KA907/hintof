@@ -888,6 +888,41 @@ textarea.field-input {
   opacity: 1;
 }
 
+/* persistent storage warning (shown only when this browser can't persist) */
+.storage-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--terracotta-deep);
+  text-align: center;
+}
+
+/* non-blocking draft-restore prompt above the editor */
+.restore-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-sunk);
+  border: var(--border);
+  border-left: 3px solid var(--terracotta);
+  border-radius: var(--radius-md);
+}
+
+.restore-text {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+.restore-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
 .segmented {
   position: relative;
   display: inline-flex;
