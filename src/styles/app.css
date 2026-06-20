@@ -971,6 +971,65 @@ textarea.field-input {
   gap: var(--space-3);
 }
 
+/* import review modal */
+.restore-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgb(42 37 33 / 45%);
+}
+
+.restore-dialog {
+  width: min(420px, 100%);
+  max-height: 90dvh;
+  overflow: auto;
+  padding: var(--space-5);
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-paper);
+}
+
+.restore-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-serif);
+  font-weight: 400;
+}
+
+.restore-summary {
+  margin: 0 0 var(--space-3);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+
+.restore-breakdown {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-4);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+
+.restore-line {
+  margin: var(--space-1) 0;
+}
+
+.restore-warn {
+  margin: 0 0 var(--space-4);
+  color: var(--terracotta-deep);
+  font-size: var(--fs-sm);
+}
+
+.restore-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
 .segmented {
   position: relative;
   display: inline-flex;

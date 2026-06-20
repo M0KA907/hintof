@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyRestore,
   canonicalJson,
   classifyRestore,
   createBackup,
@@ -62,6 +63,36 @@ describe("classifyRestore", () => {
     const before = existing.length;
     classifyRestore({ recipes: [emptyRecipe({ title: "X" })] }, existing, false);
     expect(existing.length).toBe(before);
+  });
+});
+
+describe("applyRestore", () => {
+  const base = emptyRecipe({ title: "Soup", updated: "2026-01-01" });
+  const stew = emptyRecipe({ title: "Stew", updated: "2026-05-01" });
+  const existing = [base, stew];
+  const incoming = [
+    base, // exact duplicate -> skip
+    { ...stew, updated: "2026-06-01" }, // newer -> overwrite
+    emptyRecipe({ title: "New One" }), // new -> add
+    { ...stew, title: "Older edit", updated: "2026-01-01" }, // older -> skip
+    { junk: true } // invalid
+  ];
+
+  it("merge keeps existing, overwrites only newer, skips dup/older/invalid", () => {
+    const r = applyRestore({ recipes: incoming }, existing, "merge");
+    expect(r.added).toBe(1);
+    expect(r.updated).toBe(1);
+    expect(r.skipped).toBe(2);
+    expect(r.invalid).toBe(1);
+    expect(r.recipes).toHaveLength(3); // soup + stew(updated) + new one
+    expect(r.recipes.find((x) => x.id === stew.id)?.updated).toBe("2026-06-01");
+  });
+
+  it("replace returns only valid incoming recipes", () => {
+    const r = applyRestore({ recipes: incoming }, existing, "replace");
+    expect(r.invalid).toBe(1);
+    expect(r.recipes).toHaveLength(4);
+    expect(r.added).toBe(4);
   });
 });
 

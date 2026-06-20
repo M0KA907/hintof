@@ -129,3 +129,56 @@ export function classifyRestore(
   if (backup.draft) preview.draftAction = existingHasDraft ? "replace" : "add";
   return preview;
 }
+
+export interface RestoreApplyResult {
+  recipes: Recipe[];
+  added: number;
+  updated: number;
+  skipped: number;
+  invalid: number;
+}
+
+/**
+ * Compute the recipe list a restore would produce — pure, no I/O.
+ * `replace` returns only the (valid) incoming recipes. `merge` keeps existing,
+ * adds new ids, overwrites only when the incoming copy is strictly newer, and
+ * skips exact duplicates and older/divergent ids (the conflicts the preview
+ * flags) so a merge never silently downgrades a saved recipe.
+ */
+export function applyRestore(
+  backup: { recipes?: unknown },
+  existing: Recipe[],
+  mode: "merge" | "replace"
+): RestoreApplyResult {
+  const valid: Recipe[] = [];
+  let invalid = 0;
+  for (const raw of Array.isArray(backup.recipes) ? backup.recipes : []) {
+    const r = normalizeRecipe(raw);
+    if (r) valid.push(r);
+    else invalid += 1;
+  }
+
+  if (mode === "replace") {
+    return { recipes: valid, added: valid.length, updated: 0, skipped: 0, invalid };
+  }
+
+  const byId = new Map(existing.map((r) => [r.id, r]));
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+  for (const r of valid) {
+    const current = byId.get(r.id);
+    if (!current) {
+      byId.set(r.id, r);
+      added += 1;
+    } else if (canonicalJson(current) === canonicalJson(r)) {
+      skipped += 1;
+    } else if (r.updated.localeCompare(current.updated) > 0) {
+      byId.set(r.id, r);
+      updated += 1;
+    } else {
+      skipped += 1; // older or divergent incoming — keep the saved copy
+    }
+  }
+  return { recipes: [...byId.values()], added, updated, skipped, invalid };
+}

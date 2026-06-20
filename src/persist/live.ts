@@ -2,6 +2,7 @@ import type { Recipe } from "../model/types";
 import type { AppState } from "../store/actions";
 import { beginSave, finishSave, removeFromLibrary, setLibrary, setStatus } from "../store/actions";
 import { saveDraft as saveLocalDraft } from "./autosave";
+import { createBackup, type HintofBackupV2 } from "./backup";
 import { saveLibrary } from "./library";
 import { decideDraftRestore, type DraftRestoreDecision } from "./repo/draft-conflict";
 import { initRepository, requestPersistentStorage } from "./repo";
@@ -94,7 +95,7 @@ export async function removeLive(store: AppStore, id: string): Promise<void> {
   );
 }
 
-/** Replace the whole library (library import). Preserves the stored draft. */
+/** Replace the whole library (merge import). Preserves the stored draft. */
 export async function replaceLibraryLive(store: AppStore, recipes: Recipe[]): Promise<boolean> {
   store.update((s) => setLibrary(s, recipes));
   if (repo) {
@@ -105,6 +106,45 @@ export async function replaceLibraryLive(store: AppStore, recipes: Recipe[]): Pr
       return false;
     }
   }
+  return saveLibrary(recipes).ok;
+}
+
+/** The current stored draft, if any (for import-review draft classification). */
+export async function getStoredDraft(): Promise<StoredDraft | undefined> {
+  if (!repo) return undefined;
+  try {
+    return await repo.getDraft();
+  } catch {
+    return undefined;
+  }
+}
+
+/** Build a versioned, checksummed v2 backup of the library + current draft. */
+export async function exportBackupLive(
+  store: AppStore,
+  now = new Date().toISOString()
+): Promise<HintofBackupV2> {
+  const draft = repo ? ((await repo.getDraft()) ?? null) : null;
+  return createBackup(store.get().library, draft, now);
+}
+
+/** Replace-restore: snapshot the current state first, then overwrite. */
+export async function restoreReplaceLive(
+  store: AppStore,
+  recipes: Recipe[],
+  draft: StoredDraft | null
+): Promise<boolean> {
+  if (repo) {
+    try {
+      await repo.createSnapshot("before-restore-replace"); // capture old state first
+      await repo.replaceAll(recipes, draft);
+      store.update((s) => setLibrary(s, recipes));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  store.update((s) => setLibrary(s, recipes));
   return saveLibrary(recipes).ok;
 }
 
