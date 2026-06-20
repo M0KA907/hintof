@@ -4,7 +4,7 @@ Write a recipe, get a clean Obsidian note.
 
 hintof is a small, fast, fully client-side web tool for turning a structured form into properly formatted, Obsidian-compatible Markdown — with the YAML escaping, safe filenames, and consistent note structure handled for you. It runs entirely in your browser. Nothing you type is ever uploaded anywhere.
 
-> Status: **implementation started.** Phase 0.1 has the Vite/TypeScript toolchain scaffold; see [`docs/`](docs/) for the full spec set.
+> Status: **in active development.** The editor, live preview, and local library work today. A reliability + import roadmap is in progress on a feature branch — an async IndexedDB store with safe localStorage migration, versioned/checksummed backups with restore previews and snapshots, and an opt-in server-side recipe-URL importer. See [`docs/`](docs/) for the full spec set and `.remember/remember.md` for the current build state.
 
 ## Why
 
@@ -23,7 +23,7 @@ If you keep recipes in Obsidian, you've probably hand-written frontmatter and wa
 
 ## Privacy
 
-Fully client-side. No accounts, no servers, no analytics, no trackers, and no external network requests at runtime. Your recipes live in your browser's local storage and in the files you export. (PWA/offline support is planned for v1.1.)
+Local-first. No accounts, no analytics, no trackers. Editing, browsing, saving, search, export, and backup all run in your browser; your recipes live in local browser storage and in the files you export. The only time anything leaves your device is if you explicitly use the planned **Import from URL** feature — then the recipe URL you submit is sent to hintof's own import endpoint to fetch and extract that page's structured recipe data; the fetched page is never returned to the browser or stored in your library. That importer is opt-in and not yet shipped. (PWA/offline support is planned for v1.1.)
 
 ## The output
 
@@ -42,7 +42,7 @@ hintof emits Obsidian-compatible Markdown: rich, Dataview-friendly YAML frontmat
 
 ## Tech
 
-TypeScript + Vite, no UI framework, zero runtime dependencies, deployed as static files to GitHub Pages. Tested with Vitest (unit + golden-file contract tests), Playwright (browser/responsive), and axe (accessibility) — all gated in CI before deploy.
+TypeScript + Vite, no UI framework, zero runtime dependencies, deployed as static files to GitHub Pages. Tested with Vitest (unit + golden-file contract tests) and Playwright (browser/responsive); axe accessibility checks are planned. The deploy workflow currently gates on `npm run check` (typecheck + lint + unit + build); wiring the Playwright e2e suite into CI is on the roadmap.
 
 ## Development
 

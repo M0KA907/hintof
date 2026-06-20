@@ -86,7 +86,19 @@ npm run check          # the CI gate (all of the above)
 Acceptance criteria met; unit/golden/e2e/a11y tests pass in CI; works light+dark, keyboard+touch; zero external network calls; relevant docs updated; deployed Pages build reflects it.
 
 ## Current implementation status
-**Implementation started.** Phase 0.1 scaffold is present: Vite, TypeScript, Vitest, Playwright config, ESLint/Prettier, `index.html`, and `src/main.ts`. Next step: Phase 0.2 design tokens + base styles in `docs/IMPLEMENTATION_PLAN.md`.
+**In active development.** Shipped on `main`: editor scaffold, golden-tested serializer, library list/graph views, Obsidian live preview, themes, mobile pills.
+
+In progress on `feat/storage-import-roadmap` (see `.remember/remember.md` for the live handoff): a reliability + import roadmap.
+- Done & committed: multi-recipe regression + "New" beside Save; async `RecipeRepository` engine — `src/persist/repo/*` (IndexedDB, idempotent transactional localStorage→IDB migration, draft-conflict decision, 5-snapshot retention) and `src/persist/backup.ts` (backup v2 + SHA-256 checksum + restore-preview classification); importer/search leaf modules — `src/import/url-guard.ts` (SSRF), `src/import/schema-org.ts` (DOM-free JSON-LD/microdata extractor), `src/search/*` (fuzzy search + unit aliases). All pure/tested with `fake-indexeddb` (dev-only).
+- Not yet wired into the live app: async save status, draft-restore prompt, backup-v2 UI, source provenance + schema bump, Cloudflare Pages `functions/api/import-recipe.ts`, import review screen, search UI, Playwright-in-CI.
+
+### Roadmap invariants (do not regress)
+- Never report "saved" before the IndexedDB transaction completes; mark unsaved on failure.
+- Migration is one-shot/idempotent and must never delete or overwrite legacy localStorage.
+- Backups are versioned + checksummed; Replace-restore snapshots first; keep newest 5 snapshots.
+- The URL importer is server-side only: no public CORS proxy, never return raw fetched HTML, re-validate every redirect, keep the SSRF guard strict, never log full URLs.
+- Imported data enters a review screen before saving; original ingredient lines preserved; spelling fixes are suggestions, never silent mutations.
+- Once the importer ships, qualify the "no external network requests at runtime" invariant (opt-in, explicit submit, same-origin endpoint).
 
 ## MVP vs v1.1
 - **v1.0:** core create/edit/preview/copy/download, library, all fields + Notes/Substitutions/Storage/Equipment, structured ingredients + paste-parse, grouped steps, fractions/ranges + scaling, tags/source/image-refs, both themes, full a11y, wiki-link/callout toggles, golden-tested serializer.
